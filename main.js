@@ -300,20 +300,21 @@
      smoothstep, which has zero slope at both ends of every segment — so the curve
      has no corner where two segments meet, and the coin never changes direction
      abruptly. Detour bumps that snapped back to the line caused that jerk. */
-  /* Scroll ranges where the coin holds station instead of travelling. Time spent
-     inside a dwell doesn't advance the flight, so BOTH axes freeze and it genuinely
-     parks — freezing x alone would leave it sliding down the screen. */
-  const DWELLS = [{ from: 0.62, to: 0.73 }];   // parked above 0.34x in ch-04
-  const DWELL_TOTAL = DWELLS.reduce((s, d) => s + (d.to - d.from), 0);
+  /* Where the coin stops flying and parks against a piece of layout. Freezing its
+     viewport position instead would look wrong: the page keeps scrolling, so the
+     content it is supposed to sit with slides out from under it. Anchored to an
+     element, it rides that section. `ramp` is the fraction of the window spent
+     easing in and out, leaving a plateau in the middle where it is fully parked. */
+  const ANCHORS = [
+    { from: 0.575, to: 0.78, ramp: 0.34, sel: '#ch-04 [data-num]', dx: 55, dy: -140 }
+  ];
 
-  function flowT(t) {
-    let acc = 0;
-    for (let i = 0; i < DWELLS.length; i++) {
-      const d = DWELLS[i];
-      if (t >= d.to) acc += d.to - d.from;
-      else if (t > d.from) acc += t - d.from;   // inside: output stops advancing
-    }
-    return (t - acc) / (1 - DWELL_TOTAL);
+  function anchorWeight(t, a) {
+    if (t <= a.from || t >= a.to) return 0;
+    const u = (t - a.from) / (a.to - a.from);
+    const r = a.ramp;
+    const e = u < r ? u / r : (u > 1 - r ? (1 - u) / r : 1);
+    return e * e * (3 - 2 * e);            // smoothstep in, plateau, smoothstep out
   }
 
   /* p values are in flight-time (post-dwell) space, derived from the measured
@@ -350,6 +351,13 @@
       const h = heroSection.getBoundingClientRect();
       heroGeo = { docBottom: h.bottom + window.scrollY };
     }
+    /* anchor targets in document space, so the per-frame path needs no layout read */
+    ANCHORS.forEach(a => {
+      const el = root.querySelector(a.sel);
+      if (!el) { a.geo = null; return; }
+      const r = el.getBoundingClientRect();
+      a.geo = { x: r.left + r.width / 2 + (a.dx || 0), docY: r.top + window.scrollY + (a.dy || 0) };
+    });
   }
 
   function rideFilament(progress) {
@@ -367,9 +375,19 @@
        page, and we solve for the point of the filament sitting at that height so
        it is always ON the line. Following raw path-length instead made it pin to
        the top for half the page and then jump to the bottom. */
-    const ft = flowT(t);                       // dwell-aware flight time
-    const y = minY + (maxY - minY) * ft;
-    let x = vw * coinX(ft);
+    let y = minY + (maxY - minY) * t;
+    let x = vw * coinX(t);
+
+    /* park against a section: blend the free path toward the anchored point, hold
+       there through the plateau, then blend back out — continuous at both ends */
+    for (let i = 0; i < ANCHORS.length; i++) {
+      const a = ANCHORS[i];
+      if (!a.geo) continue;
+      const w = anchorWeight(t, a);
+      if (w <= 0) continue;
+      x += (a.geo.x - x) * w;
+      y += ((a.geo.docY - scrollY) - y) * w;
+    }
 
     x = Math.max(half + 10, Math.min(vw - half - 10, x));
     astroStage.style.transform =
@@ -383,7 +401,7 @@
     }
 
     /* bank from the path's own slope, then damp */
-    const dx = (coinX(Math.min(1, ft + 0.012)) - coinX(Math.max(0, ft - 0.012))) * vw;
+    const dx = (coinX(Math.min(1, t + 0.012)) - coinX(Math.max(0, t - 0.012))) * vw;
     const dy = (maxY - minY) * 0.024;
     astroTilt += (Math.atan2(dx, dy || 1) - astroTilt) * 0.12;
     if (window.__astro) window.__astro.setPose(t, astroTilt);
