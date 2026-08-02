@@ -1,0 +1,289 @@
+/* Lenis' required stylesheet (normally shipped as lenis.css) — without these the
+   smooth-scroll wrapper can't override native scrolling reliably */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+html { background: #050706; }
+body { margin: 0; background: #050706; -webkit-font-smoothing: antialiased; }
+a { color: #F1F4EF; text-decoration: none; }
+a:hover { color: #A6E635; }
+::selection { background: rgba(166,230,53,.22); color: #F1F4EF; }
+:focus-visible { outline: 1px solid #A6E635; outline-offset: 4px; }
+
+/* the design file expressed this as a non-standard style-hover attribute */
+[data-index-toggle]:hover { color: #F1F4EF; }
+
+@keyframes drift { 0% { transform: translate3d(-4%, 0, 0) rotate(-8deg) scale(1.1); } 100% { transform: translate3d(4%, -3%, 0) rotate(-4deg) scale(1.18); } }
+@keyframes drift2 { 0% { transform: translate3d(3%, 2%, 0) rotate(12deg) scale(1.2); } 100% { transform: translate3d(-3%, -1%, 0) rotate(7deg) scale(1.1); } }
+
+/* ---------- smoked-acrylic surfaces ----------
+   Matte black body, hairline white edge, and a single iridescent sweep that only
+   touches the top-left corner. The colour lives in the 1px ring, not in a glow —
+   the face itself stays near-black so type keeps its contrast. */
+.glass {
+  position: relative;
+  border-radius: 20px;
+  /* actually translucent — the page's atmospherics and the filament refract through */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.012) 42%, rgba(166,230,53,.028)),
+    rgba(11,15,12,.52);
+  border: 1px solid rgba(255,255,255,.10);
+  /* blur radius is the dominant cost here and there are 11 of these on the page;
+     14px keeps the refraction and roughly halves the compositing work per frame */
+  backdrop-filter: blur(14px) saturate(165%);
+  -webkit-backdrop-filter: blur(14px) saturate(165%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.13),
+    inset 0 -22px 32px -24px rgba(0,0,0,.85),
+    0 18px 40px rgba(0,0,0,.48);
+  overflow: hidden;
+  isolation: isolate;
+}
+/* refracted edge: a masked 1px ring in the brand's own green range, gone by mid-edge */
+.glass::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  border-radius: inherit; padding: 1px;
+  background: linear-gradient(118deg,
+    rgba(198,255,120,.80) 0%,
+    rgba(166,230,53,.55) 18%,
+    rgba(122,214,160,.34) 34%,
+    rgba(255,255,255,0) 52%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+/* the liquid part: a specular pool top-left and a soft green bounce bottom-right */
+.glass::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(88% 56% at 10% -8%, rgba(255,255,255,.14), rgba(255,255,255,0) 60%),
+    radial-gradient(64% 44% at 92% 110%, rgba(166,230,53,.11), rgba(166,230,53,0) 72%);
+}
+.glass > * { position: relative; z-index: 1; }
+/* the design file inlines a near-black grey on these labels; on glass it reads as dirt */
+.glass-cell > div:first-child { color: rgba(166,230,53,.78) !important; }
+
+.glass-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.glass-grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.glass-cell { padding: 22px 20px; display: flex; flex-direction: column; gap: 8px; transition: border-color .4s cubic-bezier(.16,1,.3,1); }
+.glass-cell:hover { border-color: rgba(255,255,255,.17); }
+
+.glass-tabs { display: flex; gap: 6px; padding: 5px; border-radius: 16px; }
+.glass-tab {
+  position: relative; z-index: 1;
+  background: none; border: 0; border-radius: 12px;
+  padding: 13px 22px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: #676E66; transition: background .35s ease, color .35s ease;
+}
+.glass-tab:hover { color: #F1F4EF; }
+.glass-tab[aria-selected="true"] {
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.035));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 16px rgba(0,0,0,.45);
+}
+
+.glass-cta {
+  display: inline-flex; align-items: center; gap: 16px;
+  padding: 22px 32px; border-radius: 18px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: #F1F4EF;
+}
+.glass-cta:hover { color: #F1F4EF; }
+
+/* The filament is retired as a visual — the coin's flight replaced it — but the
+   path stays in the DOM because getPointAtLength() on it is what drives the coin's
+   trajectory. Geometry APIs are unaffected by opacity; display:none would break them. */
+[data-filament] { opacity: 0; }
+
+/* ---------- ch-07 audit rows ----------
+   The section's whole claim is "thirteen failure modes, in order of severity", but
+   severity was carried only by 10px grey text. This borrows the page's own meter
+   device (ch-02's 2px track + scaled fill) so the ranking is visible in the
+   skeleton, before you read a word. No new colours or primitives. */
+/* The bold second line of every section heading carries the accent. Matched on the
+   inline weight axis the design file already sets, so no markup change per heading. */
+/* Both quote forms are required: the source HTML writes 'wght', but as soon as GSAP
+   touches the element the CSSOM re-serialises the attribute with "wght". */
+h2 span[style*="'wght' 700"],
+h2 span[style*='"wght" 700'] { color: #A6E635; }
+
+.alloc-panel { display: flex; flex-direction: column; gap: 14px; padding: 22px clamp(16px, 2.4vw, 30px); margin-top: 14px; }
+/* the leading bar glows at its tip, the way the emission curve does */
+.alloc-panel [data-bar] { box-shadow: 0 0 8px rgba(166,230,53,.55); }
+.alloc-panel [data-bar][style*="rgba(255,255,255"] { box-shadow: 0 0 7px rgba(255,255,255,.25); }
+
+/* ---------- ch-02 supply chart ----------
+   Palette stays exactly what the glass system already uses: brand green, white
+   at low alpha, and the dark substrate. No new hues introduced. */
+.chart-panel { position: relative; padding: 20px clamp(16px, 2.4vw, 30px) 14px; }
+.chart-legend {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .2em; text-transform: uppercase; color: #3A403A;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.chart-legend-main { color: #A6ADA4; }
+.chart-dashkey { color: rgba(166,230,53,.8); }
+.chart-axis-right {
+  position: absolute; top: 20px; right: clamp(16px, 2.4vw, 30px);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .2em; text-transform: uppercase; color: #3A403A;
+}
+.chart-plot { position: relative; display: grid; grid-template-columns: 40px minmax(0,1fr) 40px; align-items: stretch; gap: 10px; margin-top: 14px; }
+.chart-ticks {
+  display: flex; flex-direction: column; justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: .1em; color: #676E66;
+  padding: 0 0 2px;
+}
+.chart-ticks-y { text-align: right; color: rgba(166,230,53,.75); }
+.chart-ticks-r { text-align: left; }
+.chart-xaxis {
+  display: flex; justify-content: space-between;
+  margin: 8px 50px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .18em; text-transform: uppercase; color: #676E66;
+}
+/* the cliff callout reads as a control, matching the tab pills */
+.chart-cliff-pill {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+  padding: 7px 14px; border-radius: 999px;
+  border: 1px solid rgba(166,230,53,.35);
+  background: rgba(11,15,12,.72);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .2em; text-transform: uppercase; color: rgba(166,230,53,.92);
+  white-space: nowrap;
+}
+
+/* laptop chassis around the audit readout — the lid hinges open on scroll */
+.laptop { display: flex; flex-direction: column; align-items: center; perspective: 1800px; }
+.laptop-screen {
+  width: 100%; padding: 26px 15px 20px; border-radius: 15px 15px 5px 5px;
+  transform-origin: 50% 100%;          /* hinge line sits on the base */
+  backface-visibility: hidden;
+  will-change: transform;
+}
+/* machined edge highlight along the top of the lid */
+.laptop-screen::after {
+  background:
+    radial-gradient(88% 56% at 10% -8%, rgba(255,255,255,.14), rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 3px);
+}
+.laptop-cam {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(166,230,53,.6); box-shadow: 0 0 7px rgba(166,230,53,.45);
+}
+.laptop-base {
+  position: relative;
+  width: calc(100% + 52px); height: 15px;
+  border-radius: 2px 2px 13px 13px;
+  background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.055) 45%, rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.12); border-top: 0;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 18px 34px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.16);
+}
+/* the thumb notch — the one detail that makes the silhouette read as a laptop */
+.laptop-base::after {
+  content: ''; position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+  width: 76px; height: 5px; border-radius: 0 0 7px 7px;
+  background: rgba(255,255,255,.14);
+}
+
+/* The glass shell carries the surface; rows stay transparent so the refraction
+   reads through the whole table instead of being blocked per-row. */
+.audit-table { display: grid; }
+.audit-head, .audit-row {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) clamp(64px, 11vw, 148px) 48px;
+  align-items: center; gap: 16px;
+  padding: 13px 18px;
+  background: transparent;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.audit-head { border-bottom-color: rgba(166,230,53,.26); }
+.audit-row:last-child { border-bottom: 0; }
+.audit-head {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+  letter-spacing: .26em; text-transform: uppercase;
+  color: rgba(166,230,53,.82);
+}
+.audit-head span:last-child, .audit-row .audit-sev { text-align: right; }
+.audit-row { position: relative; transition: background .3s ease; }
+.audit-id,
+.audit-label,
+.audit-sev {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .16em; text-transform: uppercase;
+}
+.audit-id { color: #3A403A; }
+.audit-label { color: #A6ADA4; transition: color .3s ease; }
+.audit-sev { color: #676E66; }
+
+/* segmented meter — reads as a discrete instrument scale, not a progress bar */
+.audit-meter {
+  position: relative; height: 7px;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.13) 0 5px, transparent 5px 8px);
+}
+.audit-meter i {
+  position: absolute; inset: 0; display: block;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.42) 0 5px, transparent 5px 8px);
+  transform-origin: left; transform: scaleX(0);
+}
+.audit-row[data-sev="1"] .audit-meter i { width: 100%; background: repeating-linear-gradient(90deg, #A6E635 0 5px, transparent 5px 8px); }
+.audit-row[data-sev="2"] .audit-meter i { width: 58%; }
+.audit-row[data-sev="3"] .audit-meter i { width: 30%; }
+.audit-row[data-sev="1"] .audit-sev { color: #A6E635; }
+.audit-row[data-sev="1"] .audit-id { color: #676E66; }
+
+.audit-row:hover { background: #0E120F; }
+.audit-row:hover .audit-label { color: #F1F4EF; }
+
+/* interactive astronaut in ch-05 */
+.astro-scene {
+  flex: 1 1 340px; max-width: 520px; min-width: 0; aspect-ratio: 1/1;
+  opacity: 0; transition: opacity .9s ease;
+}
+.astro-scene.is-ready { opacity: 1; }
+.astro-scene canvas { width: 100% !important; height: 100% !important; display: block; }
+.astro-scene { cursor: grab; }
+.astro-scene.is-dragging { cursor: grabbing; }
+@media (max-width: 900px) { .astro-scene { display: none; } }
+
+/* coin rides the emission filament; position is scroll-driven (see main.js initAstronaut) */
+.astro-stage {
+  position: fixed; top: 0; left: 0;
+  width: clamp(124px, 14vw, 244px); aspect-ratio: 1/1;
+  pointer-events: none; z-index: 12;
+  opacity: 0; transition: opacity .8s ease;
+  will-change: transform;
+}
+.astro-stage.is-ready { opacity: 1; }
+/* over the hero the coin sits behind the headline; everywhere else it rides in front */
+.astro-stage.is-behind { z-index: 5; }
+.astro-stage canvas { width: 100% !important; height: 100% !important; display: block; }
+
+/* typewriter caret, only present while a paragraph is typing */
+p.is-typing::after {
+  content: '|'; display: inline-block; margin-left: .12em;
+  color: #A6E635; animation: twBlink .9s steps(1) infinite;
+}
+@keyframes twBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+/* 3D star compass, fixed at the ch-01 sink map's center; rotation is scroll-driven (see main.js initStarCompass) */
+.star-emblem { position: absolute; top: 50%; left: 50%; width: 80%; aspect-ratio: 1/1; transform: translate(-50%, -50%); pointer-events: none; z-index: 1; }
+.star-emblem-rotate { width: 100%; height: 100%; transform-origin: 50% 50%; will-change: transform; }
+.star-emblem-img {
+  width: 100%; height: 100%; display: block; object-fit: contain;
+  image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
+  filter:
+    drop-shadow(0 0 3px rgba(166,230,53,.9))
+    drop-shadow(0 0 14px rgba(166,230,53,.5))
+    drop-shadow(0 0 36px rgba(166,230,53,.3))
+    drop-shadow(0 10px 22px rgba(0,0,0,.5));
+}

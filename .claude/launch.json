@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tokenomics",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [".claude/devserver.py", "4321"],
+      "port": 4321
+    }
+  ]
+}

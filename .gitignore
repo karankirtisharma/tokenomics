@@ -1,0 +1,10 @@
+# Raw 3D sources — kept out of git for size. The compressed, shipped models
+# (astronaut.glb 1.2MB, coin.glb 901KB) are committed instead.
+# GitHub warns above 50MB and hard-blocks at 100MB; the astronaut source is ~70MB.
+space astronaut 3d model.glb
+cyphernaut_coin_02_matrix.glb
+
+# tooling scratch
+.tmp-glb/
+.tmp-glb-tools/
+node_modules/

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cyphernaut — Tokenomics Design &amp; Economic Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  html { background: #050706; }
+  body { margin: 0; background: #050706; -webkit-font-smoothing: antialiased; }
+  a { color: #F1F4EF; text-decoration: none; }
+  a:hover { color: #A6E635; }
+  ::selection { background: rgba(166,230,53,.22); color: #F1F4EF; }
+  :focus-visible { outline: 1px solid #A6E635; outline-offset: 4px; }
+  @keyframes drift { 0% { transform: translate3d(-4%, 0, 0) rotate(-8deg) scale(1.1); } 100% { transform: translate3d(4%, -3%, 0) rotate(-4deg) scale(1.18); } }
+  @keyframes drift2 { 0% { transform: translate3d(3%, 2%, 0) rotate(12deg) scale(1.2); } 100% { transform: translate3d(-3%, -1%, 0) rotate(7deg) scale(1.1); } }
+</style>
+</helmet>
+
+<div data-page="tokenomics" style="position:relative;background:#050706;color:#F1F4EF;font-family:Archivo,sans-serif;font-variation-settings:'wght' 400,'wdth' 100;overflow-x:hidden;overflow-y:visible">
+
+  <div data-atmos style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0">
+    <div style="position:absolute;top:4%;left:-20%;width:110%;height:38vh;background:radial-gradient(60% 100% at 40% 50%, rgba(214,240,190,.055), rgba(166,230,53,.018) 45%, transparent 72%);filter:blur(38px);animation:drift 34s ease-in-out infinite alternate"></div>
+    <div style="position:absolute;top:26%;left:-10%;width:120%;height:44vh;background:radial-gradient(50% 100% at 60% 50%, rgba(255,255,255,.042), rgba(166,230,53,.014) 50%, transparent 74%);filter:blur(52px);animation:drift2 46s ease-in-out infinite alternate"></div>
+    <div style="position:absolute;top:56%;left:-24%;width:130%;height:40vh;background:radial-gradient(55% 100% at 35% 50%, rgba(214,240,190,.05), rgba(166,230,53,.016) 48%, transparent 72%);filter:blur(44px);animation:drift 52s ease-in-out infinite alternate"></div>
+    <div style="position:absolute;top:80%;left:-16%;width:120%;height:38vh;background:radial-gradient(50% 100% at 62% 50%, rgba(255,255,255,.036), transparent 70%);filter:blur(50px);animation:drift2 40s ease-in-out infinite alternate"></div>
+  </div>
+
+  <div data-filament style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden">
+    <svg width="100%" height="100%" viewBox="0 0 1000 9000" preserveAspectRatio="none" fill="none" aria-hidden="true" style="display:block">
+      <path d="M 60,0 C 60,420 120,600 210,760 C 320,955 300,1150 190,1320 C 90,1475 120,1660 260,1800 C 430,1970 470,2200 380,2430 C 300,2635 340,2860 500,3010 C 660,3160 690,3390 600,3620 C 520,3825 560,4050 700,4200 C 840,4350 860,4570 780,4790 C 700,5010 720,5230 850,5390 C 960,5525 960,5720 860,5880 C 760,6040 700,6230 760,6430 C 820,6630 800,6840 700,7010 C 610,7165 590,7350 660,7520 C 730,7690 720,7880 620,8030 C 540,8150 520,8280 560,8420 L 560,9000" stroke="rgba(255,255,255,.07)" stroke-width="1.6" vector-effect="non-scaling-stroke" transform="translate(14,26)"></path>
+      <path data-trunk d="M 60,0 C 60,420 120,600 210,760 C 320,955 300,1150 190,1320 C 90,1475 120,1660 260,1800 C 430,1970 470,2200 380,2430 C 300,2635 340,2860 500,3010 C 660,3160 690,3390 600,3620 C 520,3825 560,4050 700,4200 C 840,4350 860,4570 780,4790 C 700,5010 720,5230 850,5390 C 960,5525 960,5720 860,5880 C 760,6040 700,6230 760,6430 C 820,6630 800,6840 700,7010 C 610,7165 590,7350 660,7520 C 730,7690 720,7880 620,8030 C 540,8150 520,8280 560,8420 L 560,9000" stroke="rgba(166,230,53,.32)" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+      <g stroke="rgba(166,230,53,.16)" stroke-width="1" vector-effect="non-scaling-stroke">
+        <path d="M 232,830 C 340,880 420,900 560,896"></path>
+        <path d="M 232,830 C 330,900 400,980 430,1090"></path>
+        <path d="M 214,1290 C 300,1330 360,1420 372,1540"></path>
+        <path d="M 430,2340 C 540,2380 620,2400 760,2396"></path>
+        <path d="M 430,2340 C 520,2420 560,2520 566,2640"></path>
+        <path d="M 604,3560 C 700,3600 780,3620 900,3616"></path>
+        <path d="M 762,4230 C 840,4290 880,4380 884,4490"></path>
+        <path d="M 846,5380 C 900,5420 920,5470 922,5540"></path>
+        <path d="M 780,6390 C 860,6430 920,6500 930,6600"></path>
+        <path d="M 700,7010 C 780,7060 820,7140 826,7250"></path>
+      </g>
+    </svg>
+  </div>
+
+  <nav data-nav style="position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:24px clamp(20px,4.4vw,64px);mix-blend-mode:normal;transition:opacity .5s cubic-bezier(.16,1,.3,1)">
+    <div style="display:flex;align-items:center;gap:32px">
+      <div style="width:12px;height:12px;background:#A6E635"></div>
+      <div style="display:flex;gap:32px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#A6ADA4">
+        <a data-magnet href="#ch-01" style="display:inline-block;color:#A6ADA4">Utility</a>
+        <a data-magnet href="#ch-02" style="display:inline-block;color:#A6ADA4">Supply</a>
+        <a data-magnet href="#ch-06" style="display:inline-block;color:#A6ADA4">Modelling</a>
+        <a data-magnet href="#ch-07" style="display:inline-block;color:#A6ADA4">Audit</a>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+      <div style="width:22px;height:1px;background:rgba(255,255,255,.2)"></div>
+      <div style="width:14px;height:1px;background:rgba(255,255,255,.2)"></div>
+      <div style="width:18px;height:1px;background:rgba(255,255,255,.2)"></div>
+    </div>
+  </nav>
+
+  <section data-screen-label="00 Hero" style="position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;padding:120px clamp(20px,4.4vw,64px) 48px;box-sizing:border-box;max-width:1440px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="color:#A6ADA4">Cyphernaut — Economic Engineering</div>
+        <div>Tokenomics design · supply · incentives · accrual</div>
+      </div>
+      <div>MMXXVI</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:48px;padding:80px 0 0">
+      <h1 data-reveal style="margin:0;font-size:clamp(40px,6.4vw,108px);line-height:.94;letter-spacing:-.035em;text-transform:uppercase;max-width:16ch">
+        <span style="display:block;font-variation-settings:'wght' 300,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em"><span data-w style="display:inline-block">Tokens rarely</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em"><span data-w style="display:inline-block">fail</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em"><span data-w style="display:inline-block">at</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em"><span data-w style="display:inline-block">launch.</span></span></span>
+        <span style="display:block;font-variation-settings:'wght' 700,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em"><span data-w data-lead style="display:inline-block">They fail</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em"><span data-w data-lead style="display:inline-block">at month</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em"><span data-w data-lead style="display:inline-block">fourteen.</span></span></span>
+      </h1>
+      <div style="display:flex;gap:clamp(24px,5vw,88px);flex-wrap:wrap;align-items:flex-start">
+        <div data-fade style="width:56px;height:1px;background:rgba(255,255,255,.2);margin-top:12px;flex:none"></div>
+        <p data-fade style="margin:0;font-size:15px;line-height:1.62;color:#A6ADA4;max-width:34ch">The unlock schedule, the emission curve and the exit liquidity are one system. We model them against each other before a schedule is signed.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:3px;height:3px;background:#A6E635;opacity:.6"></div>
+        <div>Scroll — emission filament</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:flex-end">
+        <div style="width:2px;height:6px;background:#3A403A"></div>
+        <div style="width:2px;height:10px;background:#3A403A"></div>
+        <div style="width:2px;height:14px;background:#3A403A"></div>
+        <div style="width:2px;height:8px;background:#A6E635;opacity:.7"></div>
+        <div style="width:2px;height:5px;background:#3A403A"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ch-01" data-screen-label="01 Utility" data-panel-section style="position:relative;z-index:10;max-width:1440px;margin:0 auto;padding:clamp(112px,14vw,200px) clamp(20px,4.4vw,64px) 0;box-sizing:border-box">
+    <div data-panel style="border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.012);border-radius:28px;padding:clamp(28px,4vw,56px);display:grid;grid-template-columns:minmax(0,42%) 1px minmax(0,58%);gap:clamp(24px,3.4vw,56px);align-items:stretch">
+
+      <div style="display:flex;flex-direction:column;gap:40px;min-width:0">
+        <div style="position:relative;aspect-ratio:1/1;max-width:420px">
+          <svg data-sinkmap viewBox="0 0 400 400" fill="none" style="width:100%;height:100%;display:block;overflow:visible">
+            <g stroke="rgba(255,255,255,.09)" stroke-width="1">
+              <circle data-ring cx="200" cy="200" r="186"></circle>
+              <circle data-ring cx="200" cy="200" r="134"></circle>
+              <circle data-ring cx="200" cy="200" r="82"></circle>
+            </g>
+            <g data-spokes stroke="rgba(255,255,255,.07)" stroke-width="1">
+              <path d="M200,200 L200,14"></path>
+              <path d="M200,200 L360,108"></path>
+              <path d="M200,200 L360,292"></path>
+              <path d="M200,200 L200,386"></path>
+              <path d="M200,200 L40,292"></path>
+              <path d="M200,200 L40,108"></path>
+            </g>
+            <path data-sinkflow d="M200,200 C240,150 300,132 356,110" stroke="rgba(166,230,53,.5)" stroke-width="1"></path>
+            <path data-sinkflow d="M200,200 C196,140 198,80 200,18" stroke="rgba(166,230,53,.28)" stroke-width="1"></path>
+            <path data-sinkflow d="M200,200 C160,244 96,272 44,290" stroke="rgba(255,255,255,.14)" stroke-width="1"></path>
+            <g data-nodes fill="none">
+              <rect x="196" y="10" width="8" height="8" fill="#A6E635" opacity=".85"></rect>
+              <rect x="352" y="104" width="8" height="8" fill="#A6E635" opacity=".85"></rect>
+              <rect x="352" y="288" width="7" height="7" stroke="rgba(255,255,255,.28)"></rect>
+              <rect x="196" y="382" width="7" height="7" stroke="rgba(255,255,255,.28)"></rect>
+              <rect x="37" y="288" width="7" height="7" stroke="rgba(255,255,255,.28)"></rect>
+              <rect x="37" y="104" width="7" height="7" stroke="rgba(255,255,255,.28)"></rect>
+              <circle cx="200" cy="200" r="3" fill="#F1F4EF"></circle>
+            </g>
+            <g fill="#676E66" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1.6">
+              <text x="216" y="18">FEES</text>
+              <text x="300" y="96">STAKE</text>
+              <text x="300" y="316">ACCESS</text>
+              <text x="152" y="399">SETTLE</text>
+              <text x="52" y="316">GOVERN</text>
+              <text x="52" y="96">COLLAT</text>
+            </g>
+          </svg>
+          <div style="position:absolute;bottom:-4px;right:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Sink map</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div data-num style="font-size:clamp(64px,11vw,172px);line-height:.85;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="4">0</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:8px;height:8px;background:#A6E635"></div>
+            <div style="font-size:15px;font-variation-settings:'wght' 700,'wdth' 100">Utility sinks that carry weight</div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.62;color:#A6ADA4;max-width:34ch">Fourteen candidate roles. Four typically survive contact with real usage — the rest are narrative.</p>
+        </div>
+      </div>
+
+      <div data-vdivider style="width:1px;background:rgba(255,255,255,.09);align-self:center;height:60%"></div>
+
+      <div style="display:flex;flex-direction:column;justify-content:space-between;gap:48px;min-width:0">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:28px">
+          <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+            <span>01</span>
+            <span style="width:1px;height:12px;background:#A6E635;opacity:.8"></span>
+          </div>
+          <h2 data-reveal style="margin:0;text-align:right;font-size:clamp(30px,3.1vw,52px);line-height:.98;letter-spacing:.005em;text-transform:uppercase">
+            <span style="display:block;font-variation-settings:'wght' 300,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w style="display:inline-block">Token utility</span></span></span>
+            <span style="display:block;font-variation-settings:'wght' 700,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w data-lead style="display:inline-block">Architecture</span></span></span>
+          </h2>
+          <p data-fade style="margin:0;text-align:right;font-size:15px;line-height:1.62;color:#A6ADA4;max-width:34ch">We name what the token is required for, then remove every role that activity would not pay for on its own.</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div data-fade style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.09)">
+            <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Load-bearing</div>
+              <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Transaction fee capture</div>
+            </div>
+            <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Load-bearing</div>
+              <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Validator bonding</div>
+            </div>
+            <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Load-bearing</div>
+              <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Collateral &amp; deposits</div>
+            </div>
+            <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Load-bearing</div>
+              <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Settlement &amp; service payment</div>
+            </div>
+          </div>
+
+          <div data-index style="border-top:1px solid rgba(255,255,255,.09)">
+            <button data-index-toggle style="width:100%;background:none;border:0;padding:16px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66" style-hover="color:#F1F4EF">
+              <span>Full index / 14</span>
+              <span data-index-mark style="display:inline-block;width:9px;height:9px;position:relative;border:1px solid rgba(255,255,255,.2)"></span>
+            </button>
+            <div data-index-body style="overflow:hidden;height:0">
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 24px;padding:0 0 20px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;color:#676E66">
+                <div>Network access</div><div>Transaction fees</div><div>Staking / validation</div>
+                <div>Governance rights</div><div>Membership gating</div><div>Service settlement</div>
+                <div>Contributor incentives</div><div>Data &amp; compute payment</div><div>Storage payment</div>
+                <div>Reputation systems</div><div>Marketplace transactions</div><div>Collateral deposits</div>
+                <div>Revenue sharing</div><div>Ecosystem rewards</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ch-02" data-screen-label="02 Supply" data-pin-wrap style="position:relative;z-index:10">
+    <div data-pin style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;gap:clamp(32px,5vh,64px);padding:136px clamp(20px,4.4vw,64px) 96px;box-sizing:border-box;max-width:1440px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+            <span>02</span><span style="width:1px;height:12px;background:#A6E635;opacity:.8"></span><span>Emission &amp; unlock</span>
+          </div>
+          <h2 data-reveal style="margin:0;font-size:clamp(30px,3.1vw,52px);line-height:.98;letter-spacing:.005em;text-transform:uppercase">
+            <span style="display:block;font-variation-settings:'wght' 300,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w style="display:inline-block">Supply and</span></span></span>
+            <span style="display:block;font-variation-settings:'wght' 700,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w data-lead style="display:inline-block">Distribution</span></span></span>
+          </h2>
+        </div>
+        <div style="display:flex;gap:clamp(24px,4vw,64px);flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div data-num style="font-size:clamp(34px,4.4vw,64px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="1000" data-suffix="M">0</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">Max supply</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div data-num style="font-size:clamp(34px,4.4vw,64px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="18.4" data-decimals="1" data-suffix="%">0</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">Float at TGE</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div data-num style="font-size:clamp(34px,4.4vw,64px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="48" data-suffix=" MO">0</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">Schedule length</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:relative;border-top:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09);padding:0">
+        <svg viewBox="0 0 1000 340" fill="none" preserveAspectRatio="none" style="width:100%;height:clamp(220px,38vh,340px);display:block;overflow:visible">
+          <g stroke="rgba(255,255,255,.045)" stroke-width="1" vector-effect="non-scaling-stroke">
+            <path d="M0,255 L1000,255"></path><path d="M0,170 L1000,170"></path><path d="M0,85 L1000,85"></path>
+            <path d="M250,0 L250,340"></path><path d="M500,0 L500,340"></path><path d="M750,0 L750,340"></path>
+          </g>
+          <path data-curve="emission" d="M0,332 C160,326 260,268 360,206 C500,120 700,58 1000,26" stroke="#A6E635" stroke-width="1.5" vector-effect="non-scaling-stroke"></path>
+          <path data-curve="inflation" d="M0,60 C140,96 240,168 380,214 C560,272 760,300 1000,312" stroke="rgba(255,255,255,.22)" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"></path>
+          <g data-cliff>
+            <path d="M500,0 L500,340" stroke="rgba(166,230,53,.32)" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+            <rect x="494" y="126" width="12" height="12" fill="#050706" stroke="#A6E635" stroke-width="1" vector-effect="non-scaling-stroke"></rect>
+          </g>
+        </svg>
+        <div style="position:absolute;top:12px;left:0;display:flex;flex-direction:column;gap:4px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">
+          <div style="color:#A6ADA4">Circulating supply</div>
+          <div>Inflation rate — dashed</div>
+        </div>
+        <div style="position:absolute;bottom:12px;left:calc(50% + 14px);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">Cliff · M24</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">
+          <span>Allocation · base case</span><span>M0 — M48</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="flex:none;width:clamp(84px,10vw,140px);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Community</div>
+            <div style="flex:1;height:2px;background:#3A403A;position:relative"><div data-bar style="position:absolute;inset:0;width:34%;background:#A6E635;transform-origin:left;transform:scaleX(0)"></div></div>
+            <div style="flex:none;width:44px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:#A6ADA4;font-variant-numeric:tabular-nums">34%</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="flex:none;width:clamp(84px,10vw,140px);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Ecosystem</div>
+            <div style="flex:1;height:2px;background:#3A403A;position:relative"><div data-bar style="position:absolute;inset:0;width:22%;background:rgba(255,255,255,.34);transform-origin:left;transform:scaleX(0)"></div></div>
+            <div style="flex:none;width:44px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:#A6ADA4;font-variant-numeric:tabular-nums">22%</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="flex:none;width:clamp(84px,10vw,140px);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Team</div>
+            <div style="flex:1;height:2px;background:#3A403A;position:relative"><div data-bar style="position:absolute;inset:0;width:17%;background:rgba(255,255,255,.34);transform-origin:left;transform:scaleX(0)"></div></div>
+            <div style="flex:none;width:44px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:#A6ADA4;font-variant-numeric:tabular-nums">17%</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="flex:none;width:clamp(84px,10vw,140px);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Investors</div>
+            <div style="flex:1;height:2px;background:#3A403A;position:relative"><div data-bar style="position:absolute;inset:0;width:15%;background:rgba(255,255,255,.34);transform-origin:left;transform:scaleX(0)"></div></div>
+            <div style="flex:none;width:44px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:#A6ADA4;font-variant-numeric:tabular-nums">15%</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="flex:none;width:clamp(84px,10vw,140px);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Treasury</div>
+            <div style="flex:1;height:2px;background:#3A403A;position:relative"><div data-bar style="position:absolute;inset:0;width:12%;background:rgba(255,255,255,.34);transform-origin:left;transform:scaleX(0)"></div></div>
+            <div style="flex:none;width:44px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:#A6ADA4;font-variant-numeric:tabular-nums">12%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ch-03" data-screen-label="03 Incentives" style="position:relative;z-index:10;max-width:1440px;margin:0 auto;padding:clamp(112px,14vw,200px) clamp(20px,4.4vw,64px) 0;box-sizing:border-box">
+    <div style="display:flex;flex-direction:column;gap:clamp(40px,6vw,88px)">
+      <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+        <span>03</span><span style="width:1px;height:12px;background:#A6E635;opacity:.8"></span><span>Incentive mechanism design</span>
+      </div>
+
+      <h2 data-crop style="margin:0;font-size:clamp(34px,5.6vw,92px);line-height:.96;letter-spacing:-.03em;text-transform:uppercase;max-width:20ch">
+        <span data-wide style="display:block;font-variation-settings:'wght' 300,'wdth' 100">Incentives are</span>
+        <span data-wide style="display:block;font-variation-settings:'wght' 700,'wdth' 100">a budget, not a feature</span>
+      </h2>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:clamp(24px,4vw,72px);align-items:start">
+        <p data-fade style="margin:0;font-size:15px;line-height:1.62;color:#A6ADA4;max-width:34ch">Every reward is an outflow with a half-life. We price the behaviour the network needs, set the decay, and name the month the programme stops paying for itself.</p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div data-num style="font-size:clamp(56px,8vw,120px);line-height:.85;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="11" data-suffix=" MO">0</div>
+          <div style="display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+            <span style="width:3px;height:3px;background:#A6E635"></span><span>Median incentive half-life · base case</span>
+          </div>
+        </div>
+        <div style="position:relative">
+          <svg viewBox="0 0 260 140" fill="none" style="width:100%;height:auto;display:block">
+            <path d="M0,138 L260,138" stroke="rgba(255,255,255,.09)" stroke-width="1"></path>
+            <path data-curve="decay" d="M0,8 C40,10 70,40 100,72 C140,112 190,130 260,136" stroke="rgba(255,255,255,.3)" stroke-width="1"></path>
+            <g stroke="rgba(166,230,53,.5)" stroke-width="1"><path d="M100,0 L100,140"></path></g>
+            <rect x="96" y="68" width="8" height="8" fill="#A6E635"></rect>
+          </svg>
+          <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Reward decay · exhaustion point</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.09);border-top:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09)">
+        <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">01</div>
+          <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Liquidity mining with a stop date</div>
+        </div>
+        <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">02</div>
+          <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Anti-sybil reward structures</div>
+        </div>
+        <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">03</div>
+          <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Contributor compensation</div>
+        </div>
+        <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">04</div>
+          <div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Long-term holding &amp; lock incentives</div>
+        </div>
+      </div>
+
+      <div data-index style="border-top:1px solid rgba(255,255,255,.09);max-width:760px">
+        <button data-index-toggle style="width:100%;background:none;border:0;padding:16px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+          <span>Full index / 16</span>
+          <span data-index-mark style="display:inline-block;width:9px;height:9px;border:1px solid rgba(255,255,255,.2)"></span>
+        </button>
+        <div data-index-body style="overflow:hidden;height:0">
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 24px;padding:0 0 20px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;color:#676E66">
+            <div>User acquisition</div><div>Liquidity mining</div><div>Staking rewards</div>
+            <div>Validator rewards</div><div>Contributor pay</div><div>Developer incentives</div>
+            <div>Referral rewards</div><div>Ambassador programmes</div><div>Creator rewards</div>
+            <div>Governance participation</div><div>Holding incentives</div><div>Usage rewards</div>
+            <div>Data contribution</div><div>Compute contribution</div><div>Reputation rewards</div>
+            <div>Anti-sybil structures</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ch-04" data-screen-label="04 Accrual" data-panel-section style="position:relative;z-index:10;max-width:1440px;margin:0 auto;padding:clamp(112px,14vw,200px) clamp(20px,4.4vw,64px) 0;box-sizing:border-box">
+    <div data-panel style="border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.012);border-radius:28px;padding:clamp(28px,4vw,56px);display:grid;grid-template-columns:minmax(0,42%) 1px minmax(0,58%);gap:clamp(24px,3.4vw,56px)">
+      <div style="display:flex;flex-direction:column;justify-content:space-between;gap:40px;min-width:0">
+        <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+          <span>04</span><span style="width:1px;height:12px;background:#A6E635;opacity:.8"></span><span>Value accrual</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:8px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#A6E635">
+            <span>▲</span><span style="color:#3A403A">▼</span>
+          </div>
+          <div data-num style="font-size:clamp(64px,11vw,172px);line-height:.85;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="0.34" data-decimals="2" data-suffix="x">0</div>
+          <div style="font-size:15px;font-variation-settings:'wght' 700,'wdth' 100">Fee-to-float coverage</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">Base case · year two</div>
+          <div style="height:2px;background:#3A403A;position:relative;max-width:260px"><div data-bar style="position:absolute;inset:0;width:34%;background:#A6E635;transform-origin:left;transform:scaleX(0)"></div></div>
+        </div>
+      </div>
+
+      <div data-vdivider style="width:1px;background:rgba(255,255,255,.09);align-self:center;height:60%"></div>
+
+      <div style="display:flex;flex-direction:column;justify-content:space-between;gap:44px;min-width:0">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:28px">
+          <h2 data-reveal style="margin:0;text-align:right;font-size:clamp(30px,3.1vw,52px);line-height:.98;letter-spacing:.005em;text-transform:uppercase">
+            <span style="display:block;font-variation-settings:'wght' 300,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w style="display:inline-block">Value accrual</span></span></span>
+            <span style="display:block;font-variation-settings:'wght' 700,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w data-lead style="display:inline-block">Mechanics</span></span></span>
+          </h2>
+          <p data-fade style="margin:0;text-align:right;font-size:15px;line-height:1.62;color:#A6ADA4;max-width:34ch">Accrual counts only when it is funded by activity someone would pay for without the token. Each mechanism is tested against protocol revenue, not emissions.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.09)">
+          <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">Revenue-funded</div><div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Protocol fee redistribution</div></div>
+          <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">Supply-side</div><div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Locking &amp; staking requirements</div></div>
+          <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">Revenue-funded</div><div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Buyback &amp; burn from fees</div></div>
+          <div style="background:#050706;padding:20px 18px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#3A403A">Structural</div><div style="font-size:15px;font-variation-settings:'wght' 500,'wdth' 100">Validator bonding &amp; collateral</div></div>
+        </div>
+
+        <div data-index style="border-top:1px solid rgba(255,255,255,.09)">
+          <button data-index-toggle style="width:100%;background:none;border:0;padding:16px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+            <span>Full index / 14</span>
+            <span data-index-mark style="display:inline-block;width:9px;height:9px;border:1px solid rgba(255,255,255,.2)"></span>
+          </button>
+          <div data-index-body style="overflow:hidden;height:0">
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 24px;padding:0 0 20px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;color:#676E66">
+              <div>Protocol fees</div><div>Service payments</div><div>Staking requirements</div>
+              <div>Token locking</div><div>Fee redistribution</div><div>Buyback programmes</div>
+              <div>Token burns</div><div>Revenue-funded rewards</div><div>Treasury deployment</div>
+              <div>Collateral requirements</div><div>Premium access</div><div>Validator bonding</div>
+              <div>Marketplace settlement</div><div>Cross-product utility</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ch-05" data-screen-label="05 Governance" style="position:relative;z-index:10;max-width:1440px;margin:0 auto;padding:clamp(144px,18vw,240px) clamp(20px,4.4vw,64px) clamp(80px,10vw,160px);box-sizing:border-box">
+    <div style="display:flex;justify-content:flex-end">
+      <div data-quiet style="width:min(100%,440px);display:flex;flex-direction:column;gap:32px">
+        <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+          <span>05</span><span style="width:1px;height:12px;background:rgba(255,255,255,.2)"></span><span>Governance scope</span>
+        </div>
+        <h2 style="margin:0;font-size:clamp(26px,2.4vw,38px);line-height:.98;letter-spacing:.005em;text-transform:uppercase">
+          <span style="display:block;font-variation-settings:'wght' 300,'wdth' 100">Decision rights</span>
+          <span style="display:block;font-variation-settings:'wght' 700,'wdth' 100">before voting weights</span>
+        </h2>
+        <p style="margin:0;font-size:15px;line-height:1.62;color:#A6ADA4">Most governance failures are scope failures, not turnout failures. We define what the token may decide before we define how much a vote is worth.</p>
+        <div style="display:flex;align-items:baseline;gap:16px;padding-top:8px;border-top:1px solid rgba(255,255,255,.09)">
+          <div data-num style="font-size:clamp(40px,4.6vw,68px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="4.1" data-decimals="1" data-suffix="%">0</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66;max-width:22ch">Float at which quorum control concentrates · base case</div>
+        </div>
+        <div data-index style="border-top:1px solid rgba(255,255,255,.09)">
+          <button data-index-toggle style="width:100%;background:none;border:0;padding:16px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+            <span>Full index / 14</span>
+            <span data-index-mark style="display:inline-block;width:9px;height:9px;border:1px solid rgba(255,255,255,.2)"></span>
+          </button>
+          <div data-index-body style="overflow:hidden;height:0">
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;padding:0 0 20px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;color:#676E66">
+              <div>Decision rights scope</div><div>Token voting systems</div>
+              <div>Delegated voting</div><div>Proposal thresholds</div>
+              <div>Quorum rules</div><div>Council structures</div>
+              <div>Multisig governance</div><div>Emergency procedures</div>
+              <div>Treasury voting</div><div>Contributor representation</div>
+              <div>Reputation governance</div><div>Progressive decentralisation</div>
+              <div>Participation incentives</div><div>Vote-buying mitigation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ch-06" data-screen-label="06 Modelling" style="position:relative;z-index:10;max-width:1440px;margin:0 auto;padding:0 clamp(20px,4.4vw,64px) clamp(112px,14vw,200px);box-sizing:border-box">
+    <div style="display:flex;flex-direction:column;gap:clamp(32px,4vw,56px)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">
+            <span>06</span><span style="width:1px;height:12px;background:#A6E635;opacity:.8"></span><span>Simulation</span>
+          </div>
+          <h2 data-reveal style="margin:0;font-size:clamp(30px,3.1vw,52px);line-height:.98;letter-spacing:.005em;text-transform:uppercase">
+            <span style="display:block;font-variation-settings:'wght' 300,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w style="display:inline-block">Modelling and</span></span></span>
+            <span style="display:block;font-variation-settings:'wght' 700,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w data-lead style="display:inline-block">Simulation</span></span></span>
+          </h2>
+        </div>
+        <div role="tablist" aria-label="Scenario" style="display:flex;border:1px solid rgba(255,255,255,.09)">
+          <button data-scenario="bull" role="tab" aria-selected="false" style="background:none;border:0;border-right:1px solid rgba(255,255,255,.09);padding:14px 22px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">Bull</button>
+          <button data-scenario="base" role="tab" aria-selected="true" style="background:none;border:0;border-right:1px solid rgba(255,255,255,.09);padding:14px 22px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#F1F4EF">Base</button>
+          <button data-scenario="bear" role="tab" aria-selected="false" style="background:none;border:0;padding:14px 22px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66">Bear</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:24px">
+        <div style="position:relative;border-top:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09)">
+          <svg viewBox="0 0 1000 380" fill="none" preserveAspectRatio="none" style="width:100%;height:clamp(240px,42vh,380px);display:block">
+            <g stroke="rgba(255,255,255,.045)" stroke-width="1" vector-effect="non-scaling-stroke">
+              <path d="M0,95 L1000,95"></path><path d="M0,190 L1000,190"></path><path d="M0,285 L1000,285"></path>
+              <path d="M200,0 L200,380"></path><path d="M400,0 L400,380"></path><path d="M600,0 L600,380"></path><path d="M800,0 L800,380"></path>
+            </g>
+            <path data-ghost="bull" d="M0,352 C220,320 380,214 540,140 C700,70 850,44 1000,30" stroke="rgba(255,255,255,.1)" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+            <path data-ghost="bear" d="M0,352 C220,344 380,326 540,318 C700,312 850,326 1000,346" stroke="rgba(255,255,255,.1)" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+            <path data-scenario-curve d="M0,352 C220,336 380,282 540,232 C700,180 850,140 1000,116" stroke="#A6E635" stroke-width="1.5" vector-effect="non-scaling-stroke"></path>
+            <path data-scenario-pressure d="M0,60 C220,110 380,190 540,232 C700,272 850,300 1000,316" stroke="rgba(255,255,255,.26)" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"></path>
+          </svg>
+          <div style="position:absolute;top:12px;left:0;display:flex;flex-direction:column;gap:4px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">
+            <div style="color:#A6ADA4">Net demand</div><div>Sell pressure — dashed</div>
+          </div>
+          <div style="position:absolute;bottom:12px;right:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">M0 · M12 · M24 · M36 · M48</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.09)">
+          <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Peak unlock pressure</div>
+            <div data-readout="pressure" style="font-size:clamp(30px,3.4vw,48px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums">2.4x</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#676E66">x 30-day ADV</div>
+          </div>
+          <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Treasury runway</div>
+            <div data-readout="runway" style="font-size:clamp(30px,3.4vw,48px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums">38 MO</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#676E66">At current burn</div>
+          </div>
+          <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Staking participation</div>
+            <div data-readout="staking" style="font-size:clamp(30px,3.4vw,48px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums">41%</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#676E66">Of float, month 24</div>
+          </div>
+          <div style="background:#050706;padding:24px 20px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">Incentive exhaustion</div>
+            <div data-readout="exhaust" style="font-size:clamp(30px,3.4vw,48px);line-height:.9;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums">M31</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#676E66">Rewards below cost</div>
+          </div>
+        </div>
+
+        <p data-scenario-note style="margin:0;font-size:15px;line-height:1.62;color:#A6ADA4;max-width:34ch">Base case assumes moderate usage growth and no discretionary emission increase. All figures are scenario outputs, not forecasts.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="ch-07" data-screen-label="07 Audit" style="position:relative;z-index:10;margin-top:clamp(56px,7vw,96px)">
+    <div data-invert style="background:#0A0D0B;border-top:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09)">
+      <div style="max-width:1440px;margin:0 auto;padding:clamp(56px,8vw,112px) clamp(20px,4.4vw,64px);box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(32px,5vw,88px);align-items:start">
+        <div style="display:flex;flex-direction:column;gap:28px">
+          <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#A6ADA4">
+            <span>07</span><span style="width:1px;height:12px;background:#A6E635"></span><span>Review &amp; optimisation</span>
+          </div>
+          <h2 data-reveal style="margin:0;font-size:clamp(30px,3.1vw,52px);line-height:.98;letter-spacing:.005em;text-transform:uppercase">
+            <span style="display:block;font-variation-settings:'wght' 300,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w style="display:inline-block">Existing economy</span></span></span>
+            <span style="display:block;font-variation-settings:'wght' 700,'wdth' 100"><span style="display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em"><span data-w data-lead style="display:inline-block">Failure modes</span></span></span>
+          </h2>
+          <p data-fade style="margin:0;font-size:15px;line-height:1.62;color:#A6ADA4;max-width:34ch">We audit a live token economy against thirteen known failure modes and return a redesign order, not a report.</p>
+          <div style="display:flex;align-items:baseline;gap:16px">
+            <div data-num style="font-size:clamp(56px,7vw,110px);line-height:.85;letter-spacing:-.05em;font-variation-settings:'wght' 250,'wdth' 122;font-variant-numeric:tabular-nums" data-count="13">0</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#676E66;max-width:18ch">Failure modes checked in order of severity</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column">
+          <div data-audit-row style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)"><div style="display:flex;align-items:center;gap:14px"><span style="width:3px;height:3px;background:#A6E635;opacity:.4"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Aggressive unlock sequencing</span></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#A6E635">SEV 1</span></div>
+          <div data-audit-row style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)"><div style="display:flex;align-items:center;gap:14px"><span style="width:3px;height:3px;background:#A6E635;opacity:.4"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Excessive inflation</span></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#A6E635">SEV 1</span></div>
+          <div data-audit-row style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)"><div style="display:flex;align-items:center;gap:14px"><span style="width:3px;height:3px;background:#A6E635;opacity:.4"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Treasury depletion risk</span></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#676E66">SEV 2</span></div>
+          <div data-audit-row style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)"><div style="display:flex;align-items:center;gap:14px"><span style="width:3px;height:3px;background:#A6E635;opacity:.4"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Weak or artificial utility</span></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#676E66">SEV 2</span></div>
+          <div data-audit-row style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)"><div style="display:flex;align-items:center;gap:14px"><span style="width:3px;height:3px;background:#A6E635;opacity:.4"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Governance concentration</span></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#676E66">SEV 2</span></div>
+          <div data-audit-row style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)"><div style="display:flex;align-items:center;gap:14px"><span style="width:3px;height:3px;background:#A6E635;opacity:.4"></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADA4">Mercenary capital dependency</span></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#676E66">SEV 3</span></div>
+          <div data-index style="margin-top:20px;border-top:1px solid rgba(255,255,255,.2)">
+            <button data-index-toggle style="width:100%;background:none;border:0;padding:16px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#A6ADA4">
+              <span>Full index / 13</span>
+              <span data-index-mark style="display:inline-block;width:9px;height:9px;border:1px solid rgba(255,255,255,.2)"></span>
+            </button>
+            <div data-index-body style="overflow:hidden;height:0">
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;padding:0 0 20px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;color:#676E66">
+                <div>Weak token utility</div><div>Excessive inflation</div>
+                <div>Unsustainable rewards</div><div>Aggressive unlocks</div>
+                <div>Misaligned incentives</div><div>Treasury depletion</div>
+                <div>Governance concentration</div><div>Liquidity dependency</div>
+                <div>High token velocity</div><div>Poor value accrual</div>
+                <div>Excessive team allocation</div><div>Incentive farming</div>
+                <div>Regulatory exposure</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="08 Close" style="position:relative;z-index:10;max-width:1440px;margin:0 auto;padding:clamp(112px,14vw,200px) clamp(20px,4.4vw,64px) clamp(72px,9vw,128px);box-sizing:border-box">
+    <div style="display:flex;flex-direction:column;gap:clamp(40px,6vw,80px)">
+      <h2 data-close style="margin:0;font-size:clamp(28px,3.6vw,58px);line-height:1.02;letter-spacing:-.02em;max-width:24ch;font-variation-settings:'wght' 300,'wdth' 100">Send us the schedule. We will tell you which month it breaks.</h2>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap">
+        <a data-cta data-magnet href="mailto:audit@cyphernaut.studio?subject=Tokenomics%20audit%20request" style="display:inline-flex;align-items:center;gap:16px;border:1px solid rgba(255,255,255,.2);background:transparent;padding:22px 32px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#F1F4EF;transition:border-color .4s cubic-bezier(.16,1,.3,1)">
+          <span>Request a tokenomics audit</span>
+          <span data-cta-mark style="width:8px;height:8px;background:#A6E635;display:inline-block"></span>
+        </a>
+        <div style="display:flex;flex-direction:column;gap:6px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#3A403A">
+          <div style="color:#676E66">Cyphernaut — economic engineering</div>
+          <div>All figures on this page are illustrative scenarios</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+/* Chapter numbers are kept because these chapters are a genuine sequence:
+   design (01-05) -> model (06) -> audit (07). Not decoration. */
+class Component extends DCLogic {
+  componentDidMount() {
+    this._alive = true;
+    this._cleanups = [];
+    this._st = [];
+    this.boot();
+  }
+  componentWillUnmount() {
+    this._alive = false;
+    (this._cleanups || []).forEach(f => { try { f(); } catch (e) {} });
+    (this._st || []).forEach(t => {
+      try {
+        const st = (t.scrollTrigger) ? t.scrollTrigger : t;
+        const el = st && st.trigger;
+        if (!el || !el.isConnected) t.kill();
+      } catch (e) {}
+    });
+    this._st = [];
+    if (this.root && this.root.__ccOwner === this) this.root.__ccOwner = null;
+  }
+  track(x) { if (x) { this._st = this._st || []; if (x.scrollTrigger) this._st.push(x.scrollTrigger); this._st.push(x); } return x; }
+  unhide() {
+    document.querySelectorAll('[data-w],[data-fade],[data-close],[data-audit-row],[data-cliff],[data-bar],[data-vdivider],[data-wide],[data-num]').forEach(el => {
+      el.style.opacity = ''; el.style.transform = ''; el.style.clipPath = ''; el.style.visibility = '';
+    });
+    document.querySelectorAll('[data-trunk],[data-curve],[data-ring],[data-sinkflow],[data-filament] g path,[data-spokes] path,[data-nodes] > *,[data-sinkmap] text').forEach(p => {
+      p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; p.style.opacity = ''; p.style.transform = '';
+    });
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const t = parseFloat(el.getAttribute('data-count'));
+      const dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      const suf = el.getAttribute('data-suffix') || '';
+      el.textContent = (dec ? t.toFixed(dec) : Math.round(t).toLocaleString('en-US')) + suf;
+    });
+  }
+  triggersAlive() { return !!(window.ScrollTrigger && ScrollTrigger.getAll().length > 0); }
+  waitFor(test, ms) {
+    return new Promise(res => {
+      const t0 = Date.now();
+      const tick = () => {
+        if (!this._alive) return res(false);
+        if (test()) return res(true);
+        if (Date.now() - t0 > (ms || 9000)) return res(false);
+        requestAnimationFrame(tick);
+      };
+      tick();
+    });
+  }
+  async boot() {
+    const root = document.querySelector('[data-page="tokenomics"]');
+    if (!root) return;
+    this.root = root;
+    this._st = this._st || [];
+    if (root.__ccOwner && root.__ccOwner !== this && root.__ccOwner._alive) {
+      const freed = await this.waitFor(() => !root.__ccOwner || !root.__ccOwner._alive, 120000);
+      if (!freed || !this._alive) return;
+    }
+    root.__ccOwner = this;
+    this.wireStatic();
+    const failsafe = setTimeout(() => { if (!this.triggersAlive()) this.unhide(); }, 3500);
+    this._cleanups.push(() => clearTimeout(failsafe));
+    const ok = await this.waitFor(() => window.gsap && window.ScrollTrigger && window.Lenis);
+    if (!ok || !this._alive) { this.unhide(); return; }
+    gsap.registerPlugin(ScrollTrigger);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { this.unhide(); return; }
+    const run = (name, fn) => { try { fn(); } catch (e) { console.error('[tokenomics] init failed:', name, e); } };
+    run('smooth', () => this.initSmooth());
+    run('reveals', () => this.initReveals());
+    run('filament', () => this.initFilament());
+    run('parallax', () => this.initParallax());
+    run('supply', () => this.initSupply());
+    run('incentives', () => this.initIncentives());
+    run('accrual', () => this.initAccrual());
+    run('audit', () => this.initAudit());
+    run('nav', () => this.initNav());
+    run('magnets', () => this.initMagnets());
+    ScrollTrigger.config({ ignoreMobileResize: true });
+    ScrollTrigger.refresh();
+    [400, 1500].forEach(ms => {
+      const id = setTimeout(() => {
+        if (this._alive && !this.triggersAlive()) this.boot();
+      }, ms);
+      this._cleanups.push(() => clearTimeout(id));
+    });
+  }
+
+  q(sel, ctx) { return Array.prototype.slice.call((ctx || this.root).querySelectorAll(sel)); }
+
+  /* ---------- interactions that must work with or without GSAP ---------- */
+  wireStatic() {
+    if (this._wired) return;
+    this._wired = true;
+    this.q('[data-index]').forEach(wrap => {
+      const btn = wrap.querySelector('[data-index-toggle]');
+      const body = wrap.querySelector('[data-index-body]');
+      const mark = wrap.querySelector('[data-index-mark]');
+      if (!btn || !body) return;
+      let open = false;
+      btn.setAttribute('aria-expanded', 'false');
+      const onClick = () => {
+        open = !open;
+        btn.setAttribute('aria-expanded', String(open));
+        const h = body.firstElementChild ? body.firstElementChild.scrollHeight : body.scrollHeight;
+        if (window.gsap) {
+          gsap.to(body, { height: open ? h : 0, duration: .5, ease: 'power3.inOut' });
+          gsap.to(mark, { rotate: open ? 45 : 0, borderColor: open ? '#A6E635' : 'rgba(255,255,255,.2)', duration: .5, ease: 'power3.inOut' });
+        } else {
+          body.style.height = open ? h + 'px' : '0px';
+        }
+      };
+      btn.addEventListener('click', onClick);
+      this._cleanups.push(() => btn.removeEventListener('click', onClick));
+    });
+
+    const S = {
+      bull: {
+        curve: 'M0,352 C220,320 380,214 540,140 C700,70 850,44 1000,30',
+        pressure: 'M0,90 C220,150 380,236 540,286 C700,318 850,336 1000,348',
+        pressureVal: '0.8x', runway: '71 MO', staking: '62%', exhaust: 'M44',
+        note: 'Bull case assumes sustained usage growth and fee revenue funding rewards before emissions do.'
+      },
+      base: {
+        curve: 'M0,352 C220,336 380,282 540,232 C700,180 850,140 1000,116',
+        pressure: 'M0,60 C220,110 380,190 540,232 C700,272 850,300 1000,316',
+        pressureVal: '2.4x', runway: '38 MO', staking: '41%', exhaust: 'M31',
+        note: 'Base case assumes moderate usage growth and no discretionary emission increase. All figures are scenario outputs, not forecasts.'
+      },
+      bear: {
+        curve: 'M0,352 C220,344 380,326 540,318 C700,312 850,326 1000,346',
+        pressure: 'M0,30 C220,54 380,96 540,130 C700,152 850,158 1000,160',
+        pressureVal: '6.1x', runway: '14 MO', staking: '19%', exhaust: 'M17',
+        note: 'Bear case holds emissions flat while usage stalls. Sell pressure exceeds organic demand from month nine.'
+      }
+    };
+    const curve = this.root.querySelector('[data-scenario-curve]');
+    const press = this.root.querySelector('[data-scenario-pressure]');
+    const note = this.root.querySelector('[data-scenario-note]');
+    const outs = {
+      pressure: this.root.querySelector('[data-readout="pressure"]'),
+      runway: this.root.querySelector('[data-readout="runway"]'),
+      staking: this.root.querySelector('[data-readout="staking"]'),
+      exhaust: this.root.querySelector('[data-readout="exhaust"]')
+    };
+    const btns = this.q('[data-scenario]');
+    const set = key => {
+      const d = S[key];
+      if (!d) return;
+      btns.forEach(b => {
+        const on = b.getAttribute('data-scenario') === key;
+        b.setAttribute('aria-selected', String(on));
+        b.style.color = on ? '#F1F4EF' : '#676E66';
+      });
+      if (window.gsap) {
+        gsap.to(curve, { attr: { d: d.curve }, duration: 1.1, ease: 'power4.out' });
+        gsap.to(press, { attr: { d: d.pressure }, duration: 1.1, ease: 'power4.out' });
+        ['pressure', 'runway', 'staking', 'exhaust'].forEach((k, i) => {
+          const el = outs[k]; if (!el) return;
+          gsap.timeline({ delay: i * 0.045 })
+            .to(el, { yPercent: -32, opacity: 0, duration: .22, ease: 'power2.in' })
+            .add(() => { el.textContent = d[k === 'pressure' ? 'pressureVal' : k]; })
+            .fromTo(el, { yPercent: 32, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .55, ease: 'power4.out' });
+        });
+        if (note) gsap.fromTo(note, { opacity: 0 }, { opacity: 1, duration: .7, ease: 'power2.out', onStart: () => { note.textContent = d.note; } });
+      } else {
+        curve.setAttribute('d', d.curve); press.setAttribute('d', d.pressure);
+        outs.pressure.textContent = d.pressureVal; outs.runway.textContent = d.runway;
+        outs.staking.textContent = d.staking; outs.exhaust.textContent = d.exhaust;
+        if (note) note.textContent = d.note;
+      }
+    };
+    btns.forEach(b => {
+      const h = () => set(b.getAttribute('data-scenario'));
+      b.addEventListener('click', h);
+      this._cleanups.push(() => b.removeEventListener('click', h));
+    });
+  }
+
+  initSmooth() {
+    if (this._lenis) return;
+    const lenis = this._lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, smoothWheel: true });
+    lenis.on('scroll', ScrollTrigger.update);
+    const raf = t => lenis.raf(t * 1000);
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
+    this._cleanups.push(() => { gsap.ticker.remove(raf); lenis.destroy(); });
+    this.q('a[href^="#"]').forEach(a => {
+      const h = e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) { e.preventDefault(); lenis.scrollTo(t, { offset: -80, duration: 1.4 }); }
+      };
+      a.addEventListener('click', h);
+      this._cleanups.push(() => a.removeEventListener('click', h));
+    });
+  }
+
+  /* signature 1: masked word reveal, bold line leads by 40ms */
+  initReveals() {
+    this.q('[data-reveal]').forEach(el => {
+      const words = this.q('[data-w]', el);
+      gsap.set(words, { yPercent: 108, opacity: 0 });
+      this.track(gsap.timeline({
+        scrollTrigger: { trigger: el, start: 'top 78%', once: true,
+          onEnter: () => el.style.willChange = 'transform', onLeave: () => el.style.willChange = 'auto' }
+      })).to(words, {
+        yPercent: 0, opacity: 1, duration: .85, ease: 'power4.out',
+        stagger: { each: .028 },
+        delay: 0
+      }).to(words.filter(w => w.hasAttribute('data-lead')), { duration: 0 }, 0.04);
+    });
+    this.q('[data-fade]').forEach(el => {
+      this.track(gsap.fromTo(el, { y: 18, opacity: 0 }, {
+        y: 0, opacity: 1, duration: 1.1, ease: 'power4.out',
+        scrollTrigger: { trigger: el, start: 'top 86%', once: true }
+      }));
+    });
+    const close = this.root.querySelector('[data-close]');
+    if (close) this.track(gsap.fromTo(close, { opacity: 0 }, { opacity: 1, duration: 1.8, ease: 'power2.out', scrollTrigger: { trigger: close, start: 'top 82%', once: true } }));
+  }
+
+  /* the through-line: one filament, dashoffset scrubbed 1:1 with page scroll */
+  initFilament() {
+    const trunk = this.root.querySelector('[data-trunk]');
+    if (!trunk) return;
+    const len = trunk.getTotalLength();
+    gsap.set(trunk, { strokeDasharray: len, strokeDashoffset: len });
+    this.track(gsap.to(trunk, {
+      strokeDashoffset: 0, ease: 'none',
+      scrollTrigger: { trigger: this.root, start: 'top top', end: 'bottom bottom', scrub: 1 }
+    }));
+    this.q('[data-filament] g path').forEach(p => {
+      const l = p.getTotalLength();
+      gsap.set(p, { strokeDasharray: l, strokeDashoffset: l });
+      this.track(gsap.to(p, {
+        strokeDashoffset: 0, ease: 'none',
+        scrollTrigger: { trigger: this.root, start: 'top top', end: 'bottom bottom', scrub: 1 }
+      }));
+    });
+  }
+
+  initParallax() {
+    const mob = window.innerWidth < 768 ? 0.5 : 1;
+    const atmos = this.root.querySelector('[data-atmos]');
+    const fil = this.root.querySelector('[data-filament]');
+    if (atmos) this.track(gsap.to(atmos, { yPercent: 14 * mob, ease: 'none', scrollTrigger: { trigger: this.root, start: 'top top', end: 'bottom bottom', scrub: 1 } }));
+    if (fil) this.track(gsap.to(fil, { yPercent: 6 * mob, ease: 'none', scrollTrigger: { trigger: this.root, start: 'top top', end: 'bottom bottom', scrub: 1 } }));
+    this.q('[data-num]').forEach(n => {
+      this.track(gsap.to(n, { yPercent: -4 * mob, ease: 'none', scrollTrigger: { trigger: n, start: 'top bottom', end: 'bottom top', scrub: 1 } }));
+    });
+    this.q('[data-vdivider]').forEach(d => {
+      this.track(gsap.fromTo(d, { scaleY: 0 }, { scaleY: 1, transformOrigin: 'center', duration: 1.4, ease: 'power4.out', scrollTrigger: { trigger: d, start: 'top 85%', once: true } }));
+    });
+    /* signature 2: chapter 01 sink map draws itself */
+    const map = this.root.querySelector('[data-sinkmap]');
+    if (map) {
+      const tl = this.track(gsap.timeline({ scrollTrigger: { trigger: map, start: 'top 80%', once: true } }));
+      this.q('[data-ring]', map).forEach((r, i) => {
+        const l = r.getTotalLength();
+        gsap.set(r, { strokeDasharray: l, strokeDashoffset: l });
+        tl.to(r, { strokeDashoffset: 0, duration: 1.4, ease: 'power4.out' }, i * 0.12);
+      });
+      tl.fromTo(this.q('[data-spokes] path', map), { opacity: 0 }, { opacity: 1, duration: .6, stagger: .04, ease: 'power2.out' }, .3);
+      this.q('[data-sinkflow]', map).forEach((p, i) => {
+        const l = p.getTotalLength();
+        gsap.set(p, { strokeDasharray: l, strokeDashoffset: l });
+        tl.to(p, { strokeDashoffset: 0, duration: 1.2, ease: 'power3.out' }, .5 + i * 0.1);
+      });
+      tl.fromTo(this.q('[data-nodes] > *', map), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .7, stagger: .05, ease: 'power4.out', transformOrigin: 'center' }, .7);
+      tl.fromTo(this.q('text', map), { opacity: 0 }, { opacity: 1, duration: .5, stagger: .04 }, 1);
+    }
+    this.initCounters();
+  }
+
+  initCounters() {
+    this.q('[data-count]').forEach(el => {
+      const target = parseFloat(el.getAttribute('data-count'));
+      const dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      const suffix = el.getAttribute('data-suffix') || '';
+      const obj = { v: 0 };
+      const fmt = v => (dec ? v.toFixed(dec) : Math.round(v).toLocaleString('en-US')) + suffix;
+      el.textContent = fmt(0);
+      this.track(ScrollTrigger.create({
+        trigger: el, start: 'top 84%', once: true,
+        onEnter: () => gsap.to(obj, {
+          v: target, duration: 1.6, ease: 'power2.out',
+          snap: dec ? { v: 1 / Math.pow(10, dec) } : { v: 1 },
+          onUpdate: () => { el.textContent = fmt(obj.v); }
+        })
+      }));
+    });
+  }
+
+  /* signature 3: the one pin on the page — supply curve scrubs, bars crop open */
+  initSupply() {
+    if (window.innerWidth < 768) return;
+    const wrap = this.root.querySelector('[data-pin-wrap]');
+    const pin = this.root.querySelector('[data-pin]');
+    if (!wrap || !pin) return;
+    const sp = wrap.querySelector('.pin-spacer');
+    if (sp && sp.parentNode) { sp.parentNode.insertBefore(pin, sp); sp.remove(); gsap.set(pin, { clearProps: 'transform' }); }
+    const em = this.root.querySelector('[data-curve="emission"]');
+    const inf = this.root.querySelector('[data-curve="inflation"]');
+    const cliff = this.root.querySelector('[data-cliff]');
+    const bars = this.q('[data-bar]', pin);
+    [em, inf].forEach(p => { if (!p) return; const l = p.getTotalLength(); gsap.set(p, { strokeDasharray: l, strokeDashoffset: l }); });
+    if (cliff) gsap.set(cliff, { opacity: 0, scaleY: .6, transformOrigin: 'center' });
+    gsap.set(bars, { scaleX: 0 });
+    const tl = this.track(gsap.timeline({
+      scrollTrigger: { trigger: wrap, start: 'top top', end: '+=180%', pin: pin, pinSpacing: true, scrub: true, anticipatePin: 1 }
+    }));
+    tl.to(em, { strokeDashoffset: 0, ease: 'none', duration: 1 })
+      .to(inf, { strokeDashoffset: 0, ease: 'none', duration: 1 }, 0.1)
+      .to(cliff, { opacity: 1, scaleY: 1, duration: .3 }, 0.5)
+      .to(bars, { scaleX: 1, duration: .5, stagger: .07, ease: 'power3.out' }, 0.55);
+  }
+
+  initIncentives() {
+    const h = this.root.querySelector('[data-crop]');
+    if (h) {
+      const lines = this.q('[data-wide]', h);
+      gsap.set(lines, { clipPath: 'inset(0 100% 0 0)' });
+      this.track(gsap.timeline({ scrollTrigger: { trigger: h, start: 'top 80%', once: true } }))
+        .to(lines, { clipPath: 'inset(0 0% 0 0)', duration: 1.3, stagger: .12, ease: 'power4.out' })
+        .fromTo(lines, { fontVariationSettings: "'wght' 300, 'wdth' 78" }, { fontVariationSettings: "'wght' 300, 'wdth' 100", duration: 1.6, ease: 'expo.out' }, 0)
+        .fromTo(lines[1], { fontVariationSettings: "'wght' 700, 'wdth' 78" }, { fontVariationSettings: "'wght' 700, 'wdth' 100", duration: 1.6, ease: 'expo.out' }, 0.12);
+    }
+    const decay = this.root.querySelector('[data-curve="decay"]');
+    if (decay) {
+      const l = decay.getTotalLength();
+      gsap.set(decay, { strokeDasharray: l, strokeDashoffset: l });
+      this.track(gsap.to(decay, { strokeDashoffset: 0, duration: 1.6, ease: 'power3.inOut', scrollTrigger: { trigger: decay, start: 'top 84%', once: true } }));
+    }
+  }
+
+  initAccrual() {
+    const sec = document.getElementById('ch-04');
+    if (!sec) return;
+    const bars = this.q('[data-bar]', sec);
+    gsap.set(bars, { scaleX: 0 });
+    this.track(gsap.to(bars, { scaleX: 1, duration: 1.2, ease: 'power4.out', scrollTrigger: { trigger: sec, start: 'top 70%', once: true } }));
+  }
+
+  initAudit() {
+    const inv = this.root.querySelector('[data-invert]');
+    if (!inv) return;
+    const rows = this.q('[data-audit-row]', inv);
+    gsap.set(rows, { opacity: 0, x: -12 });
+    this.track(gsap.to(rows, { opacity: 1, x: 0, duration: .8, stagger: .06, ease: 'power4.out', scrollTrigger: { trigger: inv, start: 'top 72%', once: true } }));
+  }
+
+  initNav() {
+    const nav = this.root.querySelector('[data-nav]');
+    if (!nav) return;
+    this.q('[data-panel-section], [data-invert]').forEach(sec => {
+      this.track(ScrollTrigger.create({
+        trigger: sec, start: 'top 90px', end: 'bottom 90px',
+        onToggle: self => gsap.to(nav, { opacity: self.isActive ? .4 : 1, duration: .5, ease: 'power3.out' })
+      }));
+    });
+  }
+
+  initMagnets() {
+    this.q('[data-magnet]').forEach(el => {
+      const x = gsap.quickTo(el, 'x', { duration: .4, ease: 'power3' });
+      const y = gsap.quickTo(el, 'y', { duration: .4, ease: 'power3' });
+      const move = e => {
+        const r = el.getBoundingClientRect();
+        x(gsap.utils.clamp(-6, 6, (e.clientX - (r.left + r.width / 2)) * .3));
+        y(gsap.utils.clamp(-6, 6, (e.clientY - (r.top + r.height / 2)) * .3));
+      };
+      const out = () => { x(0); y(0); };
+      el.addEventListener('mousemove', move);
+      el.addEventListener('mouseleave', out);
+      this._cleanups.push(() => { el.removeEventListener('mousemove', move); el.removeEventListener('mouseleave', out); });
+    });
+    const cta = this.root.querySelector('[data-cta]');
+    if (cta) {
+      const on = () => gsap.to(cta, { borderColor: '#A6E635', duration: .4, ease: 'power3' });
+      const off = () => gsap.to(cta, { borderColor: 'rgba(255,255,255,.2)', duration: .4, ease: 'power3' });
+      cta.addEventListener('mouseenter', on);
+      cta.addEventListener('mouseleave', off);
+      this._cleanups.push(() => { cta.removeEventListener('mouseenter', on); cta.removeEventListener('mouseleave', off); });
+    }
+  }
+
+  renderVals() { return {}; }
+}
+
+</script>
+</body>
+</html>
