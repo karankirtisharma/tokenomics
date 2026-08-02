@@ -306,7 +306,7 @@
      element, it rides that section. `ramp` is the fraction of the window spent
      easing in and out, leaving a plateau in the middle where it is fully parked. */
   const ANCHORS = [
-    { from: 0.575, to: 0.78, ramp: 0.34, sel: '#ch-04 [data-num]', dx: 55, dy: -140 }
+    { from: 0.575, to: 0.78, ramp: 0.34, sel: '#ch-04 [data-num]', dx: 25, dy: -125 }
   ];
 
   function anchorWeight(t, a) {

@@ -117,6 +117,10 @@ h2 span[style*='"wght" 700'] { color: #A6E635; }
 .alloc-panel [data-bar] { box-shadow: 0 0 8px rgba(166,230,53,.55); }
 .alloc-panel [data-bar][style*="rgba(255,255,255"] { box-shadow: 0 0 7px rgba(255,255,255,.25); }
 
+/* pointer trails, behind every section but above the atmospherics */
+.trails { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+.trails canvas { display: block; width: 100% !important; height: 100% !important; }
+
 /* ---------- ch-02 supply chart ----------
    Palette stays exactly what the glass system already uses: brand green, white
    at low alpha, and the dark substrate. No new hues introduced. */
