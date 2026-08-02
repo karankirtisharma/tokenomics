@@ -7,7 +7,14 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth iframe { pointer-events: none; }
 
 html { background: #050706; }
-body { margin: 0; background: #050706; -webkit-font-smoothing: antialiased; }
+/* custom pointer: hotspot sits on the arrow tip, top-left. Keyed off its original
+   dark backdrop and downscaled to 34x44 — browsers ignore cursor images over
+   128px, and the source was 1024x1536. */
+body {
+  margin: 0; background: #050706; -webkit-font-smoothing: antialiased;
+  cursor: url("cursor-arrow.png") 3 2, auto;
+}
+a, button, [role="tab"], [data-index-toggle] { cursor: url("cursor-arrow.png") 3 2, pointer; }
 a { color: #F1F4EF; text-decoration: none; }
 a:hover { color: #A6E635; }
 ::selection { background: rgba(166,230,53,.22); color: #F1F4EF; }
@@ -116,10 +123,6 @@ h2 span[style*='"wght" 700'] { color: #A6E635; }
 /* the leading bar glows at its tip, the way the emission curve does */
 .alloc-panel [data-bar] { box-shadow: 0 0 8px rgba(166,230,53,.55); }
 .alloc-panel [data-bar][style*="rgba(255,255,255"] { box-shadow: 0 0 7px rgba(255,255,255,.25); }
-
-/* pointer trails, behind every section but above the atmospherics */
-.trails { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
-.trails canvas { display: block; width: 100% !important; height: 100% !important; }
 
 /* ---------- ch-02 supply chart ----------
    Palette stays exactly what the glass system already uses: brand green, white
