@@ -292,7 +292,7 @@
      that each frame instead of hitting getPointAtLength on every update. */
   const VB_W = 1000, VB_H = 9000, LUT_N = 240;
   let lut = null, astroStage = null, astroFil = null, lastRide = 0, astroTilt = 0;
-  let heroSection = null, heroGeo = null, astroHalf = 70, astroBehind = null;
+  let heroSection = null, heroGeo = null, astroHalf = 70, astroBehind = null, astroVisible = true;
 
   /* The coin's flight path, as fractions of the viewport: scroll progress -> x.
      The filament it used to trace is hidden now, so the path is authored directly
@@ -317,28 +317,28 @@
 
   /* p values are in flight-time (post-dwell) space, derived from the measured
      progress at which each section sits centred in the viewport. */
+  /* x and y are both fractions of the viewport, so the whole trajectory is
+     authored rather than x-authored over a fixed top-to-bottom glide. */
   const COIN_PATH = [
-    { p: 0.000, x: 0.07 },   // enters top-left behind the hero type
-    { p: 0.124, x: 0.46 },   // across the ch-01 panel
-    { p: 0.382, x: 0.80 },   // out right over the supply chart
-    { p: 0.562, x: 0.66 },   // eases through ch-03
-    { p: 0.697, x: 0.22 },   // parks in the empty column above 0.34x
-    { p: 0.764, x: 0.58 },
-    { p: 0.888, x: 0.34 },
-    { p: 1.000, x: 0.55 }    // settles beside the footer CTA
+    { p: 0.000, x: 0.16, y: 0.62 },   // starts low-left, under the headline and clear of the copy
+    { p: 0.124, x: 0.46, y: 0.42 },   // rises across the ch-01 panel
+    { p: 0.382, x: 0.80, y: 0.30 },   // out right over the supply chart
+    { p: 0.562, x: 0.66, y: 0.46 },   // eases through ch-03
+    { p: 0.697, x: 0.22, y: 0.55 },   // hands over to the ch-04 anchor here
+    { p: 1.000, x: 0.40, y: 0.60 }
   ];
 
-  function coinX(t) {
-    if (t <= COIN_PATH[0].p) return COIN_PATH[0].x;
+  function coinAt(t, key) {
+    if (t <= COIN_PATH[0].p) return COIN_PATH[0][key];
     for (let i = 1; i < COIN_PATH.length; i++) {
       const b = COIN_PATH[i];
       if (t <= b.p) {
         const a = COIN_PATH[i - 1];
         const u = (t - a.p) / (b.p - a.p);
-        return a.x + (b.x - a.x) * (u * u * (3 - 2 * u));   // smoothstep
+        return a[key] + (b[key] - a[key]) * (u * u * (3 - 2 * u));   // smoothstep
       }
     }
-    return COIN_PATH[COIN_PATH.length - 1].x;
+    return COIN_PATH[COIN_PATH.length - 1][key];
   }
 
   /* Cached in document space and refreshed only on resize/refresh. Reading
@@ -373,8 +373,8 @@
        page, and we solve for the point of the filament sitting at that height so
        it is always ON the line. Following raw path-length instead made it pin to
        the top for half the page and then jump to the bottom. */
-    let y = minY + (maxY - minY) * t;
-    let x = vw * coinX(t);
+    let y = vh * coinAt(t, 'y');
+    let x = vw * coinAt(t, 'x');
 
     /* park against a section: blend the free path toward the anchored point, hold
        there through the plateau, then blend back out — continuous at both ends */
@@ -391,6 +391,14 @@
     astroStage.style.transform =
       'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) translate(-50%,-50%)';
 
+    /* Once parked it rides that spot in the page, so it eventually scrolls out of
+       view. Hide it there rather than leaving an off-screen layer composited. */
+    const onScreen = y > -260 && y < vh + 260;
+    if (onScreen !== astroVisible) {
+      astroVisible = onScreen;
+      astroStage.style.visibility = onScreen ? '' : 'hidden';
+    }
+
     /* drop behind the hero headline while it's over that section, so the type stays
        legible. Guarded so a class write only happens on an actual change. */
     if (heroGeo) {
@@ -399,8 +407,8 @@
     }
 
     /* bank from the path's own slope, then damp */
-    const dx = (coinX(Math.min(1, t + 0.012)) - coinX(Math.max(0, t - 0.012))) * vw;
-    const dy = (maxY - minY) * 0.024;
+    const dx = (coinAt(Math.min(1, t + 0.012), 'x') - coinAt(Math.max(0, t - 0.012), 'x')) * vw;
+    const dy = Math.max(1, (coinAt(Math.min(1, t + 0.012), 'y') - coinAt(Math.max(0, t - 0.012), 'y')) * vh);
     astroTilt += (Math.atan2(dx, dy || 1) - astroTilt) * 0.12;
     if (window.__astro) window.__astro.setPose(t, astroTilt);
   }

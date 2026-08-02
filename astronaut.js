@@ -97,6 +97,17 @@ function buildStage(el, opts) {
     });
 
     pivot.add(model);
+
+    /* The exhaust plume is part of the single merged material, so it can't be given
+       its own emissive. Lighting it instead gets there: a short-range green point
+       light sitting inside the plume makes that pale mesh read as lit from within,
+       and spills a little onto the nozzle. */
+    if (opts.plumeLight) {
+      const glow = new THREE.PointLight(0x8fe424, opts.plumeLight, opts.fit * 0.8, 2);
+      glow.position.set(-opts.fit * 0.46, -opts.fit * 0.17, 0);
+      pivot.add(glow);
+    }
+
     pivot.rotation.set(opts.baseX, opts.baseY, 0);
     el.classList.add('is-ready');
     opts.onLoad && opts.onLoad();
@@ -156,7 +167,7 @@ function buildAstronaut(sceneEl) {
   const REST_Y = 0;   // model's own hero angle: visor to camera, nose and coin to the right
   const stage = buildStage(sceneEl, {
     model: sceneEl.dataset.model || 'astronaut.glb',
-    fit: 2.0, baseX: -0.06, baseY: REST_Y, exposure: 0.98, maxDpr: 1.5,
+    fit: 2.0, baseX: -0.06, baseY: REST_Y, exposure: 0.98, maxDpr: 1.5, plumeLight: 18,
     /* a white suit blows out fast — keep the key modest, the green rim as a hint
        rather than an outline, and let the environment do the reflection work */
     keyIntensity: 1.7, rimIntensity: 0.9, fillIntensity: 0.45, glintIntensity: 4, ambient: 0.34,
