@@ -273,13 +273,11 @@ h2 span[style*='"wght" 700'] { color: #A6E635; }
 .astro-stage {
   position: fixed; top: 0; left: 0;
   width: clamp(124px, 14vw, 244px); aspect-ratio: 1/1;
-  pointer-events: none; z-index: 12;
+  pointer-events: none; z-index: 5;   /* behind every section, above the atmospherics */
   opacity: 0; transition: opacity .8s ease;
   will-change: transform;
 }
 .astro-stage.is-ready { opacity: 1; }
-/* over the hero the coin sits behind the headline; everywhere else it rides in front */
-.astro-stage.is-behind { z-index: 5; }
 .astro-stage canvas { width: 100% !important; height: 100% !important; display: block; }
 
 /* typewriter caret, only present while a paragraph is typing */

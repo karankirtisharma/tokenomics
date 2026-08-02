@@ -320,12 +320,14 @@
   /* x and y are both fractions of the viewport, so the whole trajectory is
      authored rather than x-authored over a fixed top-to-bottom glide. */
   const COIN_PATH = [
-    { p: 0.000, x: 0.16, y: 0.62 },   // starts low-left, under the headline and clear of the copy
-    { p: 0.124, x: 0.46, y: 0.42 },   // rises across the ch-01 panel
-    { p: 0.382, x: 0.80, y: 0.30 },   // out right over the supply chart
-    { p: 0.562, x: 0.66, y: 0.46 },   // eases through ch-03
-    { p: 0.697, x: 0.22, y: 0.55 },   // hands over to the ch-04 anchor here
-    { p: 1.000, x: 0.40, y: 0.60 }
+    { p: 0.000, x: 0.16, y: 0.62 },   // starts low-left, under the headline
+    { p: 0.130, x: 0.42, y: 0.72 },   // low across ch-01, under the panel's cells
+    { p: 0.270, x: 0.72, y: 0.52 },   // rises right, below the stats row
+    { p: 0.400, x: 0.86, y: 0.34 },   // out over the chart's empty upper right
+    { p: 0.520, x: 0.70, y: 0.62 },   // drops back down through ch-03
+    { p: 0.640, x: 0.34, y: 0.66 },   // swings left toward the park
+    { p: 0.760, x: 0.22, y: 0.55 },   // ch-04 anchor has taken over well before here
+    { p: 1.000, x: 0.30, y: 0.58 }
   ];
 
   function coinAt(t, key) {
@@ -399,12 +401,12 @@
       astroStage.style.visibility = onScreen ? '' : 'hidden';
     }
 
-    /* drop behind the hero headline while it's over that section, so the type stays
-       legible. Guarded so a class write only happens on an actual change. */
-    if (heroGeo) {
-      const behind = heroGeo.docBottom - scrollY > y;
-      if (behind !== astroBehind) { astroBehind = behind; astroStage.classList.toggle('is-behind', behind); }
-    }
+    /* The coin stays behind the page content for its whole flight. Riding in front
+       meant it sat on the load-bearing cells, the 1,000M / 18.4% counters and the
+       ch-03 heading at various points — and any fix by hand-placing waypoints only
+       holds at the viewport it was tuned on. Behind, it reads as a background prop
+       drifting through the layout, glimpsed through the translucent panels, and it
+       can never obscure type at any size. */
 
     /* bank from the path's own slope, then damp */
     const dx = (coinAt(Math.min(1, t + 0.012), 'x') - coinAt(Math.max(0, t - 0.012), 'x')) * vw;
