@@ -154,13 +154,24 @@ if (riderEl && !reduce) {
 const sceneEl = document.querySelector('[data-astro-scene]');
 if (sceneEl && !reduce) {
   let built = false;
-  const warm = new IntersectionObserver((entries) => {
-    if (built || !entries[0].isIntersecting) return;
+  const build = () => {
+    if (built) return;
     built = true;
     warm.disconnect();
     buildAstronaut(sceneEl);
+  };
+  /* Building costs a WebGL context, a PMREM bake and a GLB decode — about two
+     seconds. Doing it at load stalled the first paint; doing it purely on approach
+     just moved the stall into the scroll. Build on the first idle slot instead, so
+     it lands while the reader is still on the hero, with the observer as a
+     fallback for anyone who scrolls down faster than that. */
+  const warm = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) build();
   }, { rootMargin: '900px' });
   warm.observe(sceneEl);
+
+  if ('requestIdleCallback' in window) requestIdleCallback(build, { timeout: 2500 });
+  else setTimeout(build, 1200);
 }
 
 function buildAstronaut(sceneEl) {

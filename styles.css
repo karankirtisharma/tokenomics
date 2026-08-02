@@ -23,6 +23,16 @@ a:hover { color: #A6E635; }
 /* the design file expressed this as a non-standard style-hover attribute */
 [data-index-toggle]:hover { color: #F1F4EF; }
 
+/* full-index panels: the label and its entries carry the accent, and the body is
+   promoted while it animates so the height tween doesn't repaint the subtree cold */
+[data-index-toggle] { color: rgba(166,230,53,.9) !important; font-weight: 600; }
+[data-index-body] { will-change: height; }
+[data-index-body] > div > div {
+  color: rgba(166,230,53,.82);
+  font-weight: 600;
+  letter-spacing: .07em;
+}
+
 @keyframes drift { 0% { transform: translate3d(-4%, 0, 0) rotate(-8deg) scale(1.1); } 100% { transform: translate3d(4%, -3%, 0) rotate(-4deg) scale(1.18); } }
 @keyframes drift2 { 0% { transform: translate3d(3%, 2%, 0) rotate(12deg) scale(1.2); } 100% { transform: translate3d(-3%, -1%, 0) rotate(7deg) scale(1.1); } }
 
@@ -269,13 +279,12 @@ h2 span[style*='"wght" 700'] { color: #A6E635; }
 .astro-scene.is-dragging { cursor: grabbing; }
 @media (max-width: 900px) { .astro-scene { display: none; } }
 
-/* coin rides the emission filament; position is scroll-driven (see main.js initAstronaut) */
+/* the coin sits in ch-04's column and turns on its own axis as you scroll */
 .astro-stage {
-  position: fixed; top: 0; left: 0;
-  width: clamp(124px, 14vw, 244px); aspect-ratio: 1/1;
-  pointer-events: none; z-index: 5;   /* behind every section, above the atmospherics */
+  width: clamp(150px, 17vw, 260px); aspect-ratio: 1/1;
+  margin: 0 auto;
+  pointer-events: none;
   opacity: 0; transition: opacity .8s ease;
-  will-change: transform;
 }
 .astro-stage.is-ready { opacity: 1; }
 .astro-stage canvas { width: 100% !important; height: 100% !important; display: block; }

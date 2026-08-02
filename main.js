@@ -32,18 +32,25 @@
       const mark = wrap.querySelector('[data-index-mark]');
       if (!btn || !body) return;
       let open = false;
-      btn.setAttribute('aria-expanded', 'false');
-      btn.addEventListener('click', () => {
-        open = !open;
+
+      function setOpen(want, onDone) {
+        if (want === open) return;
+        open = want;
         btn.setAttribute('aria-expanded', String(open));
         const h = body.firstElementChild ? body.firstElementChild.scrollHeight : body.scrollHeight;
         if (window.gsap) {
-          gsap.to(body, { height: open ? h : 0, duration: .5, ease: 'power3.inOut' });
+          gsap.to(body, { height: open ? h : 0, duration: .5, ease: 'power3.inOut', onComplete: onDone });
           gsap.to(mark, { rotate: open ? 45 : 0, borderColor: open ? '#A6E635' : 'rgba(255,255,255,.2)', duration: .5, ease: 'power3.inOut' });
         } else {
           body.style.height = open ? h + 'px' : '0px';
+          if (onDone) onDone();
         }
-      });
+      }
+
+      btn.setAttribute('aria-expanded', 'false');
+      btn.addEventListener('click', () => setOpen(!open));
+      /* scroll-reveal uses the same path as the click, so the two can't disagree */
+      wrap.__setIndexOpen = setOpen;
     });
 
     const S = {
@@ -248,6 +255,30 @@
     });
   }
 
+  /* the full-index panels open themselves as they scroll into view */
+  function initIndexReveal() {
+    let pending = null;
+    /* each panel adds ~130px when it opens, which moves everything below it.
+       Refresh once after a burst rather than per panel, so trigger positions and
+       the coin's anchor stay correct without thrashing mid-scroll. */
+    const refreshSoon = () => {
+      clearTimeout(pending);
+      pending = setTimeout(() => ScrollTrigger.refresh(), 220);
+    };
+
+    q('[data-index]').forEach(wrap => {
+      if (typeof wrap.__setIndexOpen !== 'function') return;
+      ScrollTrigger.create({
+        trigger: wrap,
+        start: 'top 82%',
+        /* opens coming down, closes going back up — setOpen is a no-op when the
+           state already matches, so repeated crossings can't stack tweens */
+        onEnter: () => wrap.__setIndexOpen(true, refreshSoon),
+        onLeaveBack: () => wrap.__setIndexOpen(false, refreshSoon)
+      });
+    });
+  }
+
   /* the audit readout's lid hinges open as you scroll it into view */
   function initLaptop() {
     const lap = root.querySelector('.laptop');
@@ -267,173 +298,21 @@
     );
   }
 
-  /* the through-line: one filament, dashoffset scrubbed 1:1 with page scroll */
-  function initFilament() {
-    const trunk = root.querySelector('[data-trunk]');
-    if (!trunk) return;
-    const len = trunk.getTotalLength();
-    gsap.set(trunk, { strokeDasharray: len, strokeDashoffset: len });
-    gsap.to(trunk, {
-      strokeDashoffset: 0, ease: 'none',
-      scrollTrigger: { trigger: root, start: 'top top', end: 'bottom bottom', scrub: 1 },
-      /* `this` is the tween — its own progress is the drawn tip, so the
-         astronaut stays glued to the line even while scrub is easing */
-      onUpdate: function () { rideFilament(this.progress()); }
-    });
-    /* the branch strokes used to draw in alongside the trunk; the filament is hidden
-       now, so those 10 scrubbed triggers were pure cost and are gone. The trunk tween
-       above stays — its progress is what flies the coin. */
-  }
-
-  /* ---------- astronaut riding the filament ---------- */
-  /* The filament svg is preserveAspectRatio="none", so its 1000x9000 viewBox maps
-     linearly onto [data-filament]'s box. We sample the trunk path once into a
-     lookup table (viewBox space, so it survives resizes) and read positions from
-     that each frame instead of hitting getPointAtLength on every update. */
-  const VB_W = 1000, VB_H = 9000, LUT_N = 240;
-  let lut = null, astroStage = null, astroFil = null, lastRide = 0, astroTilt = 0;
-  let heroSection = null, heroGeo = null, astroHalf = 70, astroBehind = null, astroVisible = true;
-
-  /* The coin's flight path, as fractions of the viewport: scroll progress -> x.
-     The filament it used to trace is hidden now, so the path is authored directly
-     instead of being solved against the line. Waypoints are interpolated with a
-     smoothstep, which has zero slope at both ends of every segment — so the curve
-     has no corner where two segments meet, and the coin never changes direction
-     abruptly. Detour bumps that snapped back to the line caused that jerk. */
-  /* Where the coin stops flying for good. It eases off the flight path onto an
-     element and then stays there — the weight never returns to 0, so there is no
-     onward travel. Anchoring to the element rather than freezing a viewport
-     position is what makes it stick to that spot in the page: the content it sits
-     with keeps scrolling, and the coin goes with it. */
-  const ANCHORS = [
-    { from: 0.575, ramp: 0.07, sel: '#ch-04 [data-num]', dx: 25, dy: -125 }
-  ];
-
-  function anchorWeight(t, a) {
-    if (t <= a.from) return 0;
-    const u = Math.min(1, (t - a.from) / a.ramp);
-    return u * u * (3 - 2 * u);            // smoothstep in, then hold at 1
-  }
-
-  /* p values are in flight-time (post-dwell) space, derived from the measured
-     progress at which each section sits centred in the viewport. */
-  /* x and y are both fractions of the viewport, so the whole trajectory is
-     authored rather than x-authored over a fixed top-to-bottom glide. */
-  const COIN_PATH = [
-    { p: 0.000, x: 0.16, y: 0.62 },   // starts low-left, under the headline
-    { p: 0.130, x: 0.42, y: 0.72 },   // low across ch-01, under the panel's cells
-    { p: 0.270, x: 0.72, y: 0.52 },   // rises right, below the stats row
-    { p: 0.400, x: 0.86, y: 0.34 },   // out over the chart's empty upper right
-    { p: 0.520, x: 0.70, y: 0.62 },   // drops back down through ch-03
-    { p: 0.640, x: 0.34, y: 0.66 },   // swings left toward the park
-    { p: 0.760, x: 0.22, y: 0.55 },   // ch-04 anchor has taken over well before here
-    { p: 1.000, x: 0.30, y: 0.58 }
-  ];
-
-  function coinAt(t, key) {
-    if (t <= COIN_PATH[0].p) return COIN_PATH[0][key];
-    for (let i = 1; i < COIN_PATH.length; i++) {
-      const b = COIN_PATH[i];
-      if (t <= b.p) {
-        const a = COIN_PATH[i - 1];
-        const u = (t - a.p) / (b.p - a.p);
-        return a[key] + (b[key] - a[key]) * (u * u * (3 - 2 * u));   // smoothstep
-      }
-    }
-    return COIN_PATH[COIN_PATH.length - 1][key];
-  }
-
-  /* Cached in document space and refreshed only on resize/refresh. Reading
-     getBoundingClientRect() inside the scroll tween forced a layout every frame,
-     right after ScrollTrigger had written transforms — classic thrash. */
-  function measureAstro() {
-    if (heroSection) {
-      const h = heroSection.getBoundingClientRect();
-      heroGeo = { docBottom: h.bottom + window.scrollY };
-    }
-    /* anchor targets in document space, so the per-frame path needs no layout read */
-    ANCHORS.forEach(a => {
-      const el = root.querySelector(a.sel);
-      if (!el) { a.geo = null; return; }
-      const r = el.getBoundingClientRect();
-      a.geo = { x: r.left + r.width / 2 + (a.dx || 0), docY: r.top + window.scrollY + (a.dy || 0) };
+  /* the coin sits in ch-04 and simply turns on its own axis as you scroll past.
+     The whole flight-path system it replaces (filament LUT, authored waypoints,
+     section anchors, per-frame positioning) is gone — this needs none of it. */
+  function initCoin() {
+    const stage = root.querySelector('[data-astro-stage]');
+    const sec = document.getElementById('ch-04');
+    if (!stage || !sec) return;
+    const spin = { t: 0 };
+    gsap.to(spin, {
+      t: 1, ease: 'none',
+      scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+      onUpdate: () => { if (window.__astro) window.__astro.setPose(spin.t, 0); }
     });
   }
 
-  function rideFilament(progress) {
-    if (!astroStage) return;
-    lastRide = progress;
-    const scrollY = window.scrollY;
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const half = astroHalf;
-    /* keep clear of the fixed nav at the top and stay fully visible at the bottom */
-    const minY = half + 124, maxY = vh - half - 28;
-    const t = Math.max(0, Math.min(1, progress));
-
-    /* Drive by screen position, not by distance along the path: the astronaut
-       glides evenly from the top of the viewport to the footer across the whole
-       page, and we solve for the point of the filament sitting at that height so
-       it is always ON the line. Following raw path-length instead made it pin to
-       the top for half the page and then jump to the bottom. */
-    let y = vh * coinAt(t, 'y');
-    let x = vw * coinAt(t, 'x');
-
-    /* park against a section: blend the free path toward the anchored point, hold
-       there through the plateau, then blend back out — continuous at both ends */
-    for (let i = 0; i < ANCHORS.length; i++) {
-      const a = ANCHORS[i];
-      if (!a.geo) continue;
-      const w = anchorWeight(t, a);
-      if (w <= 0) continue;
-      x += (a.geo.x - x) * w;
-      y += ((a.geo.docY - scrollY) - y) * w;
-    }
-
-    x = Math.max(half + 10, Math.min(vw - half - 10, x));
-    astroStage.style.transform =
-      'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) translate(-50%,-50%)';
-
-    /* Once parked it rides that spot in the page, so it eventually scrolls out of
-       view. Hide it there rather than leaving an off-screen layer composited. */
-    const onScreen = y > -260 && y < vh + 260;
-    if (onScreen !== astroVisible) {
-      astroVisible = onScreen;
-      astroStage.style.visibility = onScreen ? '' : 'hidden';
-    }
-
-    /* The coin stays behind the page content for its whole flight. Riding in front
-       meant it sat on the load-bearing cells, the 1,000M / 18.4% counters and the
-       ch-03 heading at various points — and any fix by hand-placing waypoints only
-       holds at the viewport it was tuned on. Behind, it reads as a background prop
-       drifting through the layout, glimpsed through the translucent panels, and it
-       can never obscure type at any size. */
-
-    /* bank from the path's own slope, then damp */
-    const dx = (coinAt(Math.min(1, t + 0.012), 'x') - coinAt(Math.max(0, t - 0.012), 'x')) * vw;
-    const dy = Math.max(1, (coinAt(Math.min(1, t + 0.012), 'y') - coinAt(Math.max(0, t - 0.012), 'y')) * vh);
-    astroTilt += (Math.atan2(dx, dy || 1) - astroTilt) * 0.12;
-    if (window.__astro) window.__astro.setPose(t, astroTilt);
-  }
-
-  function initAstronaut() {
-    astroStage = root.querySelector('[data-astro-stage]');
-    heroSection = root.querySelector('[data-screen-label="00 Hero"]');
-    if (!astroStage) return;
-    astroHalf = (astroStage.offsetWidth || 140) / 2;
-    measureAstro();
-    rideFilament(0);
-    /* re-measure whenever the page geometry actually changes, not per frame */
-    ScrollTrigger.addEventListener('refresh', () => {
-      astroHalf = (astroStage.offsetWidth || 140) / 2;
-      measureAstro();
-      rideFilament(lastRide);
-    });
-    window.addEventListener('resize', () => {
-      astroHalf = (astroStage.offsetWidth || 140) / 2;
-      measureAstro();
-      rideFilament(lastRide);
-    });
-  }
 
   function initParallax() {
     const mob = window.innerWidth < 768 ? 0.5 : 1;
@@ -615,8 +494,7 @@
   run('heroText', initHeroText);
   run('typewriter', initTypewriter);
   run('glitchText', initGlitchText);
-  run('astronaut', initAstronaut);
-  run('filament', initFilament);
+  run('coin', initCoin);
   run('parallax', initParallax);
   run('starCompass', initStarCompass);
   run('counters', initCounters);
@@ -625,6 +503,7 @@
   run('accrual', initAccrual);
   run('audit', initAudit);
   run('laptop', initLaptop);
+  run('indexReveal', initIndexReveal);
   run('nav', initNav);
   run('magnets', initMagnets);
 
