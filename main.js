@@ -300,21 +300,19 @@
      smoothstep, which has zero slope at both ends of every segment — so the curve
      has no corner where two segments meet, and the coin never changes direction
      abruptly. Detour bumps that snapped back to the line caused that jerk. */
-  /* Where the coin stops flying and parks against a piece of layout. Freezing its
-     viewport position instead would look wrong: the page keeps scrolling, so the
-     content it is supposed to sit with slides out from under it. Anchored to an
-     element, it rides that section. `ramp` is the fraction of the window spent
-     easing in and out, leaving a plateau in the middle where it is fully parked. */
+  /* Where the coin stops flying for good. It eases off the flight path onto an
+     element and then stays there — the weight never returns to 0, so there is no
+     onward travel. Anchoring to the element rather than freezing a viewport
+     position is what makes it stick to that spot in the page: the content it sits
+     with keeps scrolling, and the coin goes with it. */
   const ANCHORS = [
-    { from: 0.575, to: 0.78, ramp: 0.34, sel: '#ch-04 [data-num]', dx: 25, dy: -125 }
+    { from: 0.575, ramp: 0.07, sel: '#ch-04 [data-num]', dx: 25, dy: -125 }
   ];
 
   function anchorWeight(t, a) {
-    if (t <= a.from || t >= a.to) return 0;
-    const u = (t - a.from) / (a.to - a.from);
-    const r = a.ramp;
-    const e = u < r ? u / r : (u > 1 - r ? (1 - u) / r : 1);
-    return e * e * (3 - 2 * e);            // smoothstep in, plateau, smoothstep out
+    if (t <= a.from) return 0;
+    const u = Math.min(1, (t - a.from) / a.ramp);
+    return u * u * (3 - 2 * u);            // smoothstep in, then hold at 1
   }
 
   /* p values are in flight-time (post-dwell) space, derived from the measured
