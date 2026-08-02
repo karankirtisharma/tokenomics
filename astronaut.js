@@ -25,31 +25,47 @@ const getLoader = () => (loader ||= new GLTFLoader().setMeshoptDecoder(MeshoptDe
    fire technique; doing it procedurally avoids shipping a third-party sprite sheet
    of unclear licence and keeps the page dependency-free.
    The hot core sits off-centre toward the nozzle so the plume tapers away from it. */
+/* A tapering jet with turbulent filaments, drawn into a canvas. Nozzle is at the
+   right edge; the plume thins and frays toward the left. Procedural rather than a
+   downloaded sprite sheet — no third-party asset of unclear licence in the repo. */
 function flameTexture() {
-  const S = 256;
+  const W = 512, H = 160;
   const c = document.createElement('canvas');
-  c.width = c.height = S;
+  c.width = W; c.height = H;
   const ctx = c.getContext('2d');
+  ctx.globalCompositeOperation = 'lighter';
 
-  // wide soft envelope — the outer haze
-  let g = ctx.createRadialGradient(S * 0.62, S / 2, 0, S * 0.62, S / 2, S * 0.5);
-  g.addColorStop(0, 'rgba(255,255,255,0.85)');
-  g.addColorStop(0.35, 'rgba(255,255,255,0.28)');
-  g.addColorStop(0.7, 'rgba(255,255,255,0.07)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, S, S);
+  // tapering body: bright and narrow at the nozzle, wide and faint at the tail
+  for (let i = 0; i <= 90; i++) {
+    const t = i / 90;                        // 0 = nozzle, 1 = tail
+    const x = W * (1 - t);
+    const half = H * 0.5 * (0.14 + 0.62 * Math.sin(Math.PI * Math.min(1, t * 1.1)));
+    const a = Math.pow(1 - t, 2.1) * 0.62;
+    const g = ctx.createLinearGradient(0, H / 2 - half, 0, H / 2 + half);
+    g.addColorStop(0, 'rgba(255,255,255,0)');
+    g.addColorStop(0.5, 'rgba(255,255,255,' + a.toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - 7, H / 2 - half, 12, half * 2);
+  }
 
-  // hot core, tighter and pushed toward the nozzle end
-  g = ctx.createRadialGradient(S * 0.74, S / 2, 0, S * 0.74, S / 2, S * 0.24);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.5, 'rgba(255,255,255,0.45)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, S, S);
+  // turbulent filaments streaming off the core
+  for (let s = 0; s < 30; s++) {
+    const phase = s * 1.7, spread = (s % 2 ? 1 : -1) * (0.05 + (s % 5) * 0.05);
+    ctx.beginPath();
+    for (let x = W; x > 0; x -= 6) {
+      const t = 1 - x / W;
+      const y = H / 2 + Math.sin(x * 0.045 + phase) * H * 0.30 * t * t + spread * H * t;
+      if (x === W) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.05 + Math.random() * 0.06).toFixed(3) + ')';
+    ctx.lineWidth = 1 + Math.random() * 1.6;
+    ctx.stroke();
+  }
 
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
   return t;
 }
 
@@ -63,12 +79,15 @@ function addThrust(pivot, fit) {
      plume paint over the GLB's plastic exhaust lump, which can't be restyled on
      its own because the compressed model merged every part into one material.
      Sprites are stretched along x so the plume trails instead of reading as a ball. */
+  /* -x is toward the nozzle on this model, so the plume trails that way.
+     The first entry is a round bloom sitting ON the thruster so the glow wraps it;
+     the rest taper. Aspect ratios stay near-square deliberately — the previous wide,
+     flat ellipse read as a floor reflection rather than exhaust. */
+  /* One long jet, not a stack of blobs — the round bloom read as a glow smear.
+     Layered twice at different lengths so the filaments cross and shimmer. */
   [
-    /* -x is toward the nozzle on this model, so the plume trails that way */
-    { w: 0.46, h: 0.26, o: 1.00, c: 0xffffff, x: 0.00 },
-    { w: 0.70, h: 0.34, o: 0.70, c: 0xdcff8a, x: -0.16 },
-    { w: 0.98, h: 0.42, o: 0.40, c: 0xa6e635, x: -0.36 },
-    { w: 1.30, h: 0.50, o: 0.18, c: 0x6fae1a, x: -0.60 }
+    { w: 1.02, h: 0.30, o: 0.80, c: 0xd8ff5e, x: -0.44 },
+    { w: 0.74, h: 0.18, o: 0.95, c: 0xf6ffd0, x: -0.30 }
   ].forEach((d) => {
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({
       map: tex, color: d.c, transparent: true, opacity: d.o,
@@ -80,14 +99,27 @@ function addThrust(pivot, fit) {
     puffs.push({ sp, w: fit * d.w, h: fit * d.h, baseOpacity: d.o });
   });
 
-  const light = new THREE.PointLight(0xa6e635, 9, fit * 2.2, 2);
-  light.position.x = -fit * 0.12;
+  /* embers: a few small sprites drifting back down the plume */
+  const sparks = [];
+  for (let i = 0; i < 5; i++) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: tex, color: 0xd4fa7c, transparent: true, opacity: 0.5,
+      blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false
+    }));
+    const s = fit * (0.05 + (i % 3) * 0.018);
+    sp.scale.set(s, s, 1);
+    group.add(sp);
+    sparks.push({ sp, seed: i * 1.37, size: s });
+  }
+
+  const light = new THREE.PointLight(0xa6e635, 6, fit * 1.8, 2);
+  light.position.x = -fit * 0.10;
   group.add(light);
 
-  group.position.set(-fit * 0.43, -fit * 0.15, 0);   // tuned onto the nozzle
+  group.position.set(-fit * 0.12, -fit * 0.13, 0);   // jet starts at the nozzle mouth
   group.renderOrder = 999;
   pivot.add(group);
-  return { group, puffs, light };
+  return { group, puffs, sparks, light, fit };
 }
 
 function buildStage(el, opts) {
@@ -209,9 +241,23 @@ if (riderEl && !reduce) {
   }
 }
 
-/* ---------- the astronaut in ch-05, following the pointer ---------- */
+/* ---------- the astronaut in ch-05 ---------- */
+/* Built lazily. Eagerly creating it cost a second WebGL context, a PMREM env bake
+   and a 1.2MB GLB decode during page load — for a prop that lives ~6800px down the
+   page. That was the ~2s hitch on refresh. It now builds as it comes into range. */
 const sceneEl = document.querySelector('[data-astro-scene]');
 if (sceneEl && !reduce) {
+  let built = false;
+  const warm = new IntersectionObserver((entries) => {
+    if (built || !entries[0].isIntersecting) return;
+    built = true;
+    warm.disconnect();
+    buildAstronaut(sceneEl);
+  }, { rootMargin: '900px' });
+  warm.observe(sceneEl);
+}
+
+function buildAstronaut(sceneEl) {
   const REST_Y = 0;   // model's own hero angle: visor to camera, nose and coin to the right
   const stage = buildStage(sceneEl, {
     model: sceneEl.dataset.model || 'astronaut.glb',
@@ -277,7 +323,17 @@ if (sceneEl && !reduce) {
           p.sp.scale.set(p.w * f, p.h * (2 - f), 1);   // stretches long as it narrows
           p.sp.material.opacity = p.baseOpacity * (0.8 + 0.2 * f);
         });
-        stage.thrust.light.intensity = 9 * (0.85 + 0.15 * Math.sin(t * 11));
+        /* embers ride back along the plume and fade, then recycle */
+        var F = stage.thrust.fit;
+        stage.thrust.sparks.forEach(function (s) {
+          var life = ((t * 0.55 + s.seed) % 1);
+          s.sp.position.x = -F * (0.05 + life * 0.72);
+          s.sp.position.y = Math.sin(s.seed * 5 + t * 2.2) * F * 0.045 * life;
+          s.sp.material.opacity = 0.55 * (1 - life) * (1 - life);
+          var sc = s.size * (1 + life * 0.7);
+          s.sp.scale.set(sc, sc, 1);
+        });
+        stage.thrust.light.intensity = 6 * (0.85 + 0.15 * Math.sin(t * 11));
       }
 
       stage.render();

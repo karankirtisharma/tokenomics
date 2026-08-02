@@ -292,71 +292,70 @@
      that each frame instead of hitting getPointAtLength on every update. */
   const VB_W = 1000, VB_H = 9000, LUT_N = 240;
   let lut = null, astroStage = null, astroFil = null, lastRide = 0, astroTilt = 0;
-  let heroSection = null, filGeo = null, heroGeo = null, detour = null, astroHalf = 70;
+  let heroSection = null, heroGeo = null, astroHalf = 70, astroBehind = null;
 
-  function buildLut(trunk) {
-    const total = trunk.getTotalLength();
-    const arr = new Array(LUT_N + 1);
-    for (let i = 0; i <= LUT_N; i++) {
-      const pt = trunk.getPointAtLength((i / LUT_N) * total);
-      arr[i] = { x: pt.x, y: pt.y };
+  /* The coin's flight path, as fractions of the viewport: scroll progress -> x.
+     The filament it used to trace is hidden now, so the path is authored directly
+     instead of being solved against the line. Waypoints are interpolated with a
+     smoothstep, which has zero slope at both ends of every segment — so the curve
+     has no corner where two segments meet, and the coin never changes direction
+     abruptly. Detour bumps that snapped back to the line caused that jerk. */
+  /* Scroll ranges where the coin holds station instead of travelling. Time spent
+     inside a dwell doesn't advance the flight, so BOTH axes freeze and it genuinely
+     parks — freezing x alone would leave it sliding down the screen. */
+  const DWELLS = [{ from: 0.62, to: 0.73 }];   // parked above 0.34x in ch-04
+  const DWELL_TOTAL = DWELLS.reduce((s, d) => s + (d.to - d.from), 0);
+
+  function flowT(t) {
+    let acc = 0;
+    for (let i = 0; i < DWELLS.length; i++) {
+      const d = DWELLS[i];
+      if (t >= d.to) acc += d.to - d.from;
+      else if (t > d.from) acc += t - d.from;   // inside: output stops advancing
     }
-    return arr;
+    return (t - acc) / (1 - DWELL_TOTAL);
   }
 
-  /* path y increases monotonically, so a plain binary search finds the point
-     sitting at a given viewBox height — used to hold the astronaut inside the
-     safe band instead of letting it drift off-screen */
-  function lutAtY(y) {
-    if (y <= lut[0].y) return { x: lut[0].x, y: lut[0].y, i: 0 };
-    if (y >= lut[LUT_N].y) return { x: lut[LUT_N].x, y: lut[LUT_N].y, i: LUT_N - 1 };
-    let lo = 0, hi = LUT_N;
-    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (lut[mid].y < y) lo = mid; else hi = mid; }
-    const a = lut[lo], b = lut[hi], k = (y - a.y) / ((b.y - a.y) || 1);
-    return { x: a.x + (b.x - a.x) * k, y, i: lo };
+  /* p values are in flight-time (post-dwell) space, derived from the measured
+     progress at which each section sits centred in the viewport. */
+  const COIN_PATH = [
+    { p: 0.000, x: 0.07 },   // enters top-left behind the hero type
+    { p: 0.124, x: 0.46 },   // across the ch-01 panel
+    { p: 0.382, x: 0.80 },   // out right over the supply chart
+    { p: 0.562, x: 0.66 },   // eases through ch-03
+    { p: 0.697, x: 0.22 },   // parks in the empty column above 0.34x
+    { p: 0.764, x: 0.58 },
+    { p: 0.888, x: 0.34 },
+    { p: 1.000, x: 0.55 }    // settles beside the footer CTA
+  ];
+
+  function coinX(t) {
+    if (t <= COIN_PATH[0].p) return COIN_PATH[0].x;
+    for (let i = 1; i < COIN_PATH.length; i++) {
+      const b = COIN_PATH[i];
+      if (t <= b.p) {
+        const a = COIN_PATH[i - 1];
+        const u = (t - a.p) / (b.p - a.p);
+        return a.x + (b.x - a.x) * (u * u * (3 - 2 * u));   // smoothstep
+      }
+    }
+    return COIN_PATH[COIN_PATH.length - 1].x;
   }
 
-  /* Geometry is cached in document space and refreshed only on resize/refresh.
-     Reading getBoundingClientRect() inside the scroll tween forced a layout every
-     frame, right after ScrollTrigger had written transforms — classic thrash, and
-     the main reason scrolling felt gritty. */
+  /* Cached in document space and refreshed only on resize/refresh. Reading
+     getBoundingClientRect() inside the scroll tween forced a layout every frame,
+     right after ScrollTrigger had written transforms — classic thrash. */
   function measureAstro() {
-    if (!astroFil) return;
-    const r = astroFil.getBoundingClientRect();
-    filGeo = {
-      docTop: r.top + window.scrollY - (parseFloat(gsap.getProperty(astroFil, 'y')) || 0),
-      height: r.height,
-      left: r.left,
-      width: r.width
-    };
     if (heroSection) {
       const h = heroSection.getBoundingClientRect();
       heroGeo = { docBottom: h.bottom + window.scrollY };
     }
-    /* progress window over which the coin swings out across ch-01 */
-    const ch01 = document.getElementById('ch-01');
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (ch01 && maxScroll > 0) {
-      const b = ch01.getBoundingClientRect();
-      const top = b.top + window.scrollY;
-      detour = {
-        start: Math.max(0, (top - window.innerHeight * 0.9) / maxScroll),
-        end: Math.min(1, (top + b.height * 0.95) / maxScroll)
-      };
-    }
   }
 
   function rideFilament(progress) {
-    if (!lut || !astroStage || !astroFil || !filGeo) return;
+    if (!astroStage) return;
     lastRide = progress;
     const scrollY = window.scrollY;
-    const parY = parseFloat(gsap.getProperty(astroFil, 'y')) || 0;   // cached transform, no layout
-    const r = {
-      top: filGeo.docTop - scrollY + parY,
-      height: filGeo.height,
-      left: filGeo.left,
-      width: filGeo.width
-    };
     const vw = window.innerWidth, vh = window.innerHeight;
     const half = astroHalf;
     /* keep clear of the fixed nav at the top and stay fully visible at the bottom */
@@ -368,43 +367,32 @@
        page, and we solve for the point of the filament sitting at that height so
        it is always ON the line. Following raw path-length instead made it pin to
        the top for half the page and then jump to the bottom. */
-    const y = minY + (maxY - minY) * t;
-    const hit = lutAtY(((y - r.top) / r.height) * VB_H);
-    let x = r.left + (hit.x / VB_W) * r.width;
-
-    /* Across ch-01 the coin arcs out to the right of the panel and then returns to
-       the filament. A raised cosine is used deliberately: it's zero AND flat at both
-       ends, so it rejoins the line with no kink — "meet it where it was". */
-    if (detour && t > detour.start && t < detour.end) {
-      const u = (t - detour.start) / (detour.end - detour.start);
-      const bump = 0.5 - 0.5 * Math.cos(2 * Math.PI * u);
-      x += (vw * 0.47 - x) * bump;
-    }
+    const ft = flowT(t);                       // dwell-aware flight time
+    const y = minY + (maxY - minY) * ft;
+    let x = vw * coinX(ft);
 
     x = Math.max(half + 10, Math.min(vw - half - 10, x));
     astroStage.style.transform =
       'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) translate(-50%,-50%)';
 
-    /* drop behind the hero headline while it's over that section, so the type stays legible */
-    if (heroGeo) astroStage.classList.toggle('is-behind', heroGeo.docBottom - scrollY > y);
+    /* drop behind the hero headline while it's over that section, so the type stays
+       legible. Guarded so a class write only happens on an actual change. */
+    if (heroGeo) {
+      const behind = heroGeo.docBottom - scrollY > y;
+      if (behind !== astroBehind) { astroBehind = behind; astroStage.classList.toggle('is-behind', behind); }
+    }
 
-    /* bank from a wide tangent window, then damp — neighbouring LUT samples alone
-       make the model twitch every time the path wiggles */
-    const i0 = Math.max(0, hit.i - 4), i1 = Math.min(LUT_N, hit.i + 4);
-    const dx = ((lut[i1].x - lut[i0].x) / VB_W) * r.width;
-    const dy = ((lut[i1].y - lut[i0].y) / VB_H) * r.height;
-    const target = Math.atan2(dx, dy || 1);
-    astroTilt += (target - astroTilt) * 0.12;
+    /* bank from the path's own slope, then damp */
+    const dx = (coinX(Math.min(1, ft + 0.012)) - coinX(Math.max(0, ft - 0.012))) * vw;
+    const dy = (maxY - minY) * 0.024;
+    astroTilt += (Math.atan2(dx, dy || 1) - astroTilt) * 0.12;
     if (window.__astro) window.__astro.setPose(t, astroTilt);
   }
 
   function initAstronaut() {
     astroStage = root.querySelector('[data-astro-stage]');
-    astroFil = root.querySelector('[data-filament]');
     heroSection = root.querySelector('[data-screen-label="00 Hero"]');
-    const trunk = root.querySelector('[data-trunk]');
-    if (!astroStage || !astroFil || !trunk) return;
-    lut = buildLut(trunk);
+    if (!astroStage) return;
     astroHalf = (astroStage.offsetWidth || 140) / 2;
     measureAstro();
     rideFilament(0);
@@ -425,13 +413,12 @@
     const mob = window.innerWidth < 768 ? 0.5 : 1;
     const atmos = root.querySelector('[data-atmos]');
     const fil = root.querySelector('[data-filament]');
-    /* Parallax the atmospherics' children, not the container. Translating the
-       full-height container pushed its box past the page bottom, and since a
-       transform still contributes to scrollable overflow that was inflating the
-       document by ~1200px — the phantom space under the footer. The children are
-       clipped by [data-atmos]'s own overflow:hidden, so they can't extend anything. */
-    const atmosLayers = q('[data-atmos] > div');
-    if (atmosLayers.length) gsap.to(atmosLayers, { yPercent: 14 * mob, ease: 'none', scrollTrigger: { trigger: root, start: 'top top', end: 'bottom bottom', scrub: 1 } });
+    /* No atmospheric parallax. Translating the full-height container inflated the
+       document by ~1200px (a transform still contributes to scrollable overflow),
+       and moving it to the children put GSAP in a fight with their `drift` CSS
+       keyframes over the same transform — CSS animations outrank inline styles, so
+       the tween computed every scroll frame and was thrown away. The drift keyframes
+       already supply the motion. */
     /* the filament is invisible now (the coin replaced it), so its parallax bought
        nothing and its downward translate was inflating the page height */
     q('[data-num]').forEach(n => {

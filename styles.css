@@ -166,7 +166,14 @@ h2 span[style*='"wght" 700'] { color: #A6E635; }
   width: 100%; padding: 26px 15px 20px; border-radius: 15px 15px 5px 5px;
   transform-origin: 50% 100%;          /* hinge line sits on the base */
   backface-visibility: hidden;
-  will-change: transform;
+  /* No backdrop-filter here: this element is rotateX-animated, and blurring a
+     backdrop through a 3D-transformed layer forces a full backdrop re-render every
+     frame — it was costing seconds of stalls across the open. The page behind it is
+     flat dark, so the blur was invisible anyway; the base colour carries the panel. */
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.012) 42%, rgba(166,230,53,.028)),
+    #0b0f0c;
 }
 /* machined edge highlight along the top of the lid */
 .laptop-screen::after {
